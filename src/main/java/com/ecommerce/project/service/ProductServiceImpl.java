@@ -9,10 +9,10 @@ import com.ecommerce.project.reposetories.CategoryRepository;
 import com.ecommerce.project.reposetories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.PathMatcher;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,8 +27,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ModelMapper modelMapper;
+
     @Autowired
-    private PathMatcher pathMatcher;
+    private FileService fileService;
+
+    @Value("${project.image.path}")
+    private String path;
 
     @Override
     public ProductResponse searchProductByKeyword(String keyword) {
@@ -119,19 +123,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO updateProductImage(Long productId, MultipartFile image) {
+    public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {
         Product productFromDB = productRepository.findById(productId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Product", "productId", productId));
 
-        String path = "images/";
-        String fileName = uploadImage(path, image);
+
+        String fileName = fileService.uploadImage(path, image);
         productFromDB.setImage(fileName);
         Product savedProduct = productRepository.save(productFromDB);
         return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
-    private String uploadImage(String path, MultipartFile image) {
 
-    }
 }
