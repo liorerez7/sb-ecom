@@ -1,14 +1,15 @@
 package com.ecommerce.project.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.EnableMBeanExport;
 
 @Entity
 @NoArgsConstructor
 @Data
 @Table(name = "roles")
+@AllArgsConstructor
 public class Role {
 
     @Id
@@ -23,4 +24,5 @@ public class Role {
     public Role(AppRole roleName) {
         this.roleName = roleName;
     }
+
 }
