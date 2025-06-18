@@ -72,6 +72,7 @@ public class WebSecurityConfig {
      * Configures the AuthenticationManager bean.
      * This manager performs actual authentication when needed.
      */
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
