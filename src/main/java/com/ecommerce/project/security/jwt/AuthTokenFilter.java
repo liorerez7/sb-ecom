@@ -97,7 +97,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
      * Example: "Authorization: Bearer <token>"
      */
     private String parseJwt(HttpServletRequest request) {
-        String jwt = jwtUtils.getJwtFromHeader(request);
+        //String jwt = jwtUtils.getJwtFromHeader(request);
+        String jwt = jwtUtils.getJwtFromCookies(request);
 
         // Log the extracted token (or null)
         logger.debug("AuthTokenFilter.java: {}", jwt);
