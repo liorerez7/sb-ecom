@@ -12,7 +12,6 @@ import com.ecommerce.project.security.request.UserInfoRequest;
 import com.ecommerce.project.security.response.MessageResponse;
 import com.ecommerce.project.security.response.UserInfoResponse;
 import com.ecommerce.project.security.services.UserDetailsImpl;
-import io.jsonwebtoken.security.Password;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -90,7 +89,7 @@ public class AuthController {
                     .body(new MessageResponse("Error: Username is already taken!").getMessage());
         }
 
-        if(userRepository.existByEmail(signUpRequest.getEmail())) {
+        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!").getMessage());

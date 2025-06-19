@@ -49,6 +49,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         // Log the URI of the request (useful for debugging)
         logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
 
+
+
         try {
             // Extract the token from the Authorization header (if present)
             String jwt = parseJwt(request);
