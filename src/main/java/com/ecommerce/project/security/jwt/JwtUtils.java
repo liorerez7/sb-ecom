@@ -4,7 +4,6 @@ import com.ecommerce.project.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.micrometer.observation.transport.ResponseContext;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -21,7 +20,6 @@ import java.util.Date;
 
 /**
  * JwtUtils is a utility class responsible for all JWT-related operations:
- *
  * Responsibilities:
  * - Extract JWT token from HTTP headers
  * - Generate JWT tokens from UserDetails
@@ -72,6 +70,15 @@ public class JwtUtils {
                 .maxAge(24 * 60 * 60) // Set cookie expiration based on JWT expiration
                 .build();
     }
+
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from(jwtCookie) // Create a cookie to clear the JWT
+                .path("/api")
+                .build();
+    }
+
+
+
     public String getJwtFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, jwtCookie);
 
