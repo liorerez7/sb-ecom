@@ -11,15 +11,18 @@ import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.reposetories.CartItemRepository;
 import com.ecommerce.project.reposetories.CartRepository;
 import com.ecommerce.project.reposetories.ProductRepository;
+import com.ecommerce.project.util.AuthUtil;
 import org.apache.catalina.LifecycleState;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.naming.Context;
 import java.lang.module.ResolutionException;
 import java.util.List;
 import java.util.stream.Stream;
 
+@Service
 public class CartServiceImpl implements CartService {
 
     @Autowired
@@ -57,6 +60,10 @@ public class CartServiceImpl implements CartService {
 
         cartItemRepository.save(newCartItem);
 
+        // just for the first product that is being added, when cart is empty
+        cart.getCartItems().add(newCartItem);
+
+
         //TODO: only for development purpose, maybe later product quantity = product.getQuantity() - quantity;
         product.setQuantity(product.getQuantity());
 
@@ -75,6 +82,46 @@ public class CartServiceImpl implements CartService {
 
         cartDTO.setProducts(productDTOStream.toList());
 
+        return cartDTO;
+    }
+
+    @Override
+    public List<CartDTO> getAllCarts() {
+        List<Cart> carts = cartRepository.findAll();
+        if(carts.isEmpty()) {
+            throw new APIException("No carts found");
+        }
+
+        List<CartDTO> dtoCarts = carts.stream().map(cart -> {
+            CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+            List<CartItem> cartItems = cart.getCartItems();
+
+            cart.getCartItems().forEach(cartItem -> {cartItem.getProduct().setQuantity(cartItem.getQuantity());});
+
+            Stream<ProductDTO> productDTOStream = cartItems.stream().map(cartItem ->
+                    modelMapper.map(cartItem.getProduct(), ProductDTO.class));
+
+            cartDTO.setProducts(productDTOStream.toList());
+
+            return cartDTO;
+        }).toList();
+
+        return dtoCarts;
+    }
+
+    @Override
+    public CartDTO getCart(String emailId, Long cartId) {
+        Cart cart = cartRepository.findCartByEmailAndCartId(emailId, cartId);
+        if(cart == null) {
+            throw new ResourceNotFoundException("Cart", "cartId", cartId);
+        }
+        CartDTO cartDTO = modelMapper.map(cart, CartDTO.class);
+        cart.getCartItems().forEach(cartItem -> {cartItem.getProduct().setQuantity(cartItem.getQuantity());});
+        List<ProductDTO> products = cart.getCartItems().stream()
+                .map(p -> modelMapper.map(p.getProduct(), ProductDTO.class))
+                .toList();
+
+        cartDTO.setProducts(products);
         return cartDTO;
     }
 
