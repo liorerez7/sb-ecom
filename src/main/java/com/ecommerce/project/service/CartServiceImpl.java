@@ -151,6 +151,15 @@ public class CartServiceImpl implements CartService {
             throw new APIException("Product " + product.getProductName() + " not found in cart");
         }
 
+        int newQuantity = cartItem.getQuantity() + quantity;
+        if(newQuantity < 0) {
+            throw new APIException("Cannot reduce quantity below zero for product " + product.getProductName());
+        }
+
+        if(newQuantity == 0) {
+            deleteProductFromCart(cartId, productId);
+        }
+
         cartItem.setProductPrice(product.getSpecialPrice());
         cartItem.setQuantity(cartItem.getQuantity() + quantity);
         cartItem.setDiscount(product.getDiscount());
@@ -172,6 +181,27 @@ public class CartServiceImpl implements CartService {
 
         cartDTO.setProducts(productDTOStream.toList());
         return cartDTO;
+    }
+
+    @Transactional
+    @Override
+    public String deleteProductFromCart(Long cartId, Long productId) {
+
+        Cart cart = cartRepository.findById(cartId).orElseThrow(
+                () -> new ResourceNotFoundException("Cart", "cartId", cartId)
+        );
+
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+        if (cartItem == null) {
+            throw new APIException("Product with ID " + productId + " not found in cart with ID " + cartId);
+        }
+
+        cart.setTotalPrice(cart.getTotalPrice() - cartItem.getProductPrice() * cartItem.getQuantity());
+
+        cartItemRepository.deleteCartItemByProductIdAndCartId(productId, cartId);
+
+        return "Product with ID " + productId + " deleted from cart with ID " + cartId;
+
     }
 
     private Cart createCart(){
