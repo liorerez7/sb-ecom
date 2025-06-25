@@ -44,8 +44,6 @@ public class ProductServiceImpl implements ProductService {
     private String path;
     @Autowired
     private CartRepository cartRepository;
-    @Autowired
-    private ProductService productService;
 
     @Autowired
     private CartService cartService;
