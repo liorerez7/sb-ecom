@@ -159,14 +159,15 @@ public class CartServiceImpl implements CartService {
         if(newQuantity == 0) {
             deleteProductFromCart(cartId, productId);
         }
+        else{
+            cartItem.setProductPrice(product.getSpecialPrice());
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+            cartItem.setDiscount(product.getDiscount());
+            cart.setTotalPrice(cart.getTotalPrice() + (cartItem.getProductPrice() * quantity));
+            cartRepository.save(cart);
+        }
 
-        cartItem.setProductPrice(product.getSpecialPrice());
-        cartItem.setQuantity(cartItem.getQuantity() + quantity);
-        cartItem.setDiscount(product.getDiscount());
-        cart.setTotalPrice(cart.getTotalPrice() + cartItem.getProductPrice() * quantity);
-        cartRepository.save(cart);
         CartItem updatedItem = cartItemRepository.save(cartItem);
-
         if(updatedItem.getQuantity() == 0) {
             cartItemRepository.deleteById(updatedItem.getCartItemId());
         }
@@ -198,10 +199,40 @@ public class CartServiceImpl implements CartService {
 
         cart.setTotalPrice(cart.getTotalPrice() - cartItem.getProductPrice() * cartItem.getQuantity());
 
-        cartItemRepository.deleteCartItemByProductIdAndCartId(productId, cartId);
+        cartItemRepository.deleteCartItemByProductIdAndCartId(cartId, productId);
 
         return "Product with ID " + productId + " deleted from cart with ID " + cartId;
 
+    }
+
+    @Override
+    public void UpdateProductInCart(Long cartId, Long productId) {
+
+        Cart cart = cartRepository.findById(cartId).orElseThrow(
+                () -> new ResourceNotFoundException("Cart", "cartId", cartId)
+        );
+
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new ResourceNotFoundException("Product", "productId", productId)
+        );
+
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
+        if(cartItem == null) {
+            throw new APIException("Product with ID " + productId + " not found in cart with ID " + cartId);
+        }
+
+        // e.g. 1000 - 100*2 = 800. (meaning the old product price was 100 and quantity was 2)
+        double cartPrice = cart.getTotalPrice() -
+                cartItem.getProductPrice() * cartItem.getQuantity();
+
+        // new price = 200 for example
+        cartItem.setProductPrice(product.getSpecialPrice());
+
+        // e.g. 800 + 200*2 = 1200. (meaning the new product price is 200 and quantity is still 2)
+        cart.setTotalPrice(cartPrice + cartItem.getProductPrice() * cartItem.getQuantity());
+
+        cartItemRepository.save(cartItem);
     }
 
     private Cart createCart(){
