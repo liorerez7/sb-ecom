@@ -95,16 +95,22 @@ public class CartServiceImpl implements CartService {
 
             cart.getCartItems().forEach(cartItem -> {cartItem.getProduct().setQuantity(cartItem.getQuantity());});
 
+
+
             Stream<ProductDTO> productDTOStream = cartItems.stream().map(cartItem ->
-                    modelMapper.map(cartItem.getProduct(), ProductDTO.class));
+            {
+                ProductDTO map = modelMapper.map(cartItem.getProduct(), ProductDTO.class);
+                map.setQuantity(cartItem.getQuantity());
+                return map;
+            });
 
             cartDTO.setProducts(productDTOStream.toList());
-
             return cartDTO;
         }).toList();
 
         return dtoCarts;
     }
+
 
     @Override
     public CartDTO getCart(String emailId, Long cartId) {
