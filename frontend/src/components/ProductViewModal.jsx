@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
 
 function ProductViewModal({ open, setOpen, product, isAvailable }) {
   
