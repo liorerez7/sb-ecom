@@ -6,7 +6,6 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
     setOpen(false);
   }
 
-  // רק בדיקה אם אין מוצר - ה-Dialog יטפל ב-open state
   if (!product) return null;
 
   const { 

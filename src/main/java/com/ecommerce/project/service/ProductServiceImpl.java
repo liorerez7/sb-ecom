@@ -42,11 +42,16 @@ public class ProductServiceImpl implements ProductService {
 
     @Value("${project.image.path}")
     private String path;
+
+    @Value("${image.base.url}")
+    private String imageBaseUrl;
+
     @Autowired
     private CartRepository cartRepository;
 
     @Autowired
     private CartService cartService;
+    private ProductService productService;
 
     @Override
     public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -100,7 +105,29 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
         Page<Product> pageProducts = productRepository.findAll(pageDetails);
-        return getProductResponse(pageProducts);
+
+        List<Product> products = pageProducts.getContent();
+
+        List<ProductDTO> productDTOList = products.stream().map(product -> {
+            ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+            productDTO.setImage(constructImageUrl(product.getImage()));
+            return productDTO;
+        }).toList();
+
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOList);
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+
+        return productResponse;
+    }
+
+    private String constructImageUrl(String imageName) {
+        return imageBaseUrl.endsWith("/") ? imageBaseUrl + imageName : imageBaseUrl + "/" + imageName;
     }
 
     @Override

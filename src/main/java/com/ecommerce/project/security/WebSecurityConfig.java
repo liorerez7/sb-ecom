@@ -118,6 +118,8 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/admin/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
                                 .requestMatchers("/api/images/**").permitAll()
+                                .requestMatchers("/images/**").permitAll()
+
 
                                 // Any other request must be authenticated (must have valid JWT)
                                 .anyRequest().authenticated()
