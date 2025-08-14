@@ -32,7 +32,7 @@ const Filter = () => {
 
     useEffect(() => {
         const currentCategory = searchParams.get("category") || "all";
-        const sortOrder = searchParams.get("sortby") || "asc";
+        const sortOrder = searchParams.get("sortOrder") || "asc";
         const currentSearchTerm = searchParams.get("keyword") || "";
 
         setSelectedCategory(currentCategory);
