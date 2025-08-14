@@ -5,16 +5,16 @@ import { fetchProducts } from "../store/actions";
 
 const Products = () => {
     
-    const isLoading = false;
-    const errorMessage = "";
+
     const {products} = useSelector((state) => state.products); 
+    const {isLoading, errorMessage} = useSelector((state) => state.errors);
+
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(fetchProducts())
     }, [dispatch]);
 
-    console.log(products);
 
     // const products = [
     // {
@@ -39,6 +39,9 @@ const Products = () => {
     //     }
     // ]
     
+    console.log(products);
+
+
     return (
         <div className="lg:px-14 sm:px-8 px-4 py-14 2xl:w-[90%] 2xl:mx-auto">
             {isLoading ? (<p>Loading...</p>) : (errorMessage ? (<p>{errorMessage}</p>) : (
