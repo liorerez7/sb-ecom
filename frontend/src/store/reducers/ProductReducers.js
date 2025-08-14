@@ -1,6 +1,8 @@
+import { act } from "react";
+
 const initialState = {
   products: null,
-  categories: null,
+  categories: [],
   pagination: {},
 };
 
@@ -23,6 +25,13 @@ export const productReducer = (state = initialState, action) => {
                 ...state,
                 error: action.payload,
             };
+
+        case 'FETCH_CATEGORIES_SUCCESS':
+            return {
+                ...state,
+                categories: action.payload
+            };
+
         default:
             return state;
     }

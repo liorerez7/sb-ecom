@@ -10,15 +10,7 @@ import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
 import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 
 
-const Filter = () => {
-
-    const categories = [
-        { categoryId: 1, categoryName: "Electronics" },
-        { categoryId: 2, categoryName: "Fashion" },
-        { categoryId: 3, categoryName: "Home & Kitchen" },
-        { categoryId: 4, categoryName: "Sports & Outdoors" },
-        { categoryId: 5, categoryName: "Books" }
-    ];
+const Filter = ({ categories }) => {
 
     const [searchParams] = useSearchParams();
     const params = new URLSearchParams(searchParams.toString());
