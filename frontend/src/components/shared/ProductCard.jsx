@@ -3,6 +3,7 @@ import { useState } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import ProductViewModal from "./ProductViewModal";
 import { useDispatch } from "react-redux";
+import { truncateText } from "../../utils/truncateText";
 
 const ProductCard = ({
   productId,
@@ -50,11 +51,11 @@ const ProductCard = ({
 
             <div className="p-4">
               <h2 onClick={openModalWith} className="text-lg font-semibold mb-2 cursor-pointer">
-                {productName}
+                {truncateText(productName, 50)}
               </h2>
 
               <div className="min-h-20 max-h-20">
-                <p className="text-gray-600 text-sm">{description}</p>
+                <p className="text-gray-600 text-sm">{truncateText(description)}</p>
               </div>
 
               {!disabledModal && (

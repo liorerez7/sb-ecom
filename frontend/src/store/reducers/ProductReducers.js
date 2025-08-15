@@ -29,7 +29,14 @@ export const productReducer = (state = initialState, action) => {
         case 'FETCH_CATEGORIES_SUCCESS':
             return {
                 ...state,
-                categories: action.payload
+                categories: action.payload,
+                pagination: {
+                    pageNumber: action.pageNumber,
+                    pageSize: action.pageSize,
+                    totalElements: action.totalElements,
+                    totalPages: action.totalPages,
+                    lastPage: action.lastPage,
+                },
             };
 
         default:

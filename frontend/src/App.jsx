@@ -1,6 +1,5 @@
 import './App.css'
-import Filter from './components/Filter'
-import Products from './components/Products'
+import Products from './components/products/Products'
 
 function App() {
 
