@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { FaShoppingCart, FaStore, FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const { pathname: path } = useLocation();
   const [navbarOpen, setNavbarOpen] = useState(false);
+  const {cart} = useSelector((state) => state.carts);
 
   // Close the mobile menu whenever the route changes
   useEffect(() => {
@@ -90,7 +92,7 @@ const Navbar = () => {
           <span className="relative inline-block">
             <FaShoppingCart size={20} />
             <span className="absolute -top-2 -right-2 bg-indigo-700 text-white text-[10px] leading-none rounded-full px-1.5 py-0.5">
-              0
+              {cart.length || 0}
             </span>
           </span>
         </Link>
