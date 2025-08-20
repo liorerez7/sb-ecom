@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { FaShoppingCart, FaStore, FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import UserMenu from "../UserMenu";
 
 const Navbar = () => {
   const { pathname: path } = useLocation();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const {cart} = useSelector((state) => state.carts);
+  const {user} = useSelector((state) => state.auth);
 
   // Close the mobile menu whenever the route changes
   useEffect(() => {
@@ -71,7 +73,7 @@ const Navbar = () => {
           Contact
         </Link>
       </li>
-      <li className="w-full">
+      {user && user.id ? (<UserMenu/>) : (<li className="w-full">
         <Link
           to="/login"
           className={`${navLinkBase} ${
@@ -81,7 +83,9 @@ const Navbar = () => {
           <FaUser className="mr-2" />
           Login
         </Link>
-      </li>
+      </li>)
+      }
+      
       <li className="w-full">
         <Link
           to="/cart"
