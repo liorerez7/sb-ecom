@@ -139,3 +139,22 @@ export const logOutUser = (toast, navigate) => (dispatch) => {
     toast.success("Logged out successfully");
     navigate('/login');
 };
+
+
+export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModal) => async (dispatch, getState) => {
+    
+    dispatch({type: "BUTTON_LOADER"});
+
+    try {
+        const {data} = await api.post("/addresses", sendData);
+        toast.success("Address added successfully");
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Registration failed");
+        dispatch({type: "IS_ERROR", payload: null});
+    }
+    finally {
+        setOpenAddressModal(false);
+    }
+
+}

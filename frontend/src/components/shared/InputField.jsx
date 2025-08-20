@@ -1,7 +1,7 @@
 const InputField = ({
   label,
   id,
-  type,
+  type = "text",
   errors,
   register,
   required,
@@ -10,7 +10,36 @@ const InputField = ({
   min,
   value,
   placeholder,
+  rules, // NEW: מאפשר העברת חוקים מותאמים
 }) => {
+  // בסיס כללי ולידציה
+  const baseRules = {
+    ...(required ? { required: { value: true, message: message || `${label} is required` } } : {}),
+    ...(min ? { minLength: { value: min, message: `Minimum ${min} characters is required` } } : {}),
+  };
+
+  // חוקים מובנים לפי type (email/url)
+  const typeRules =
+    type === "email"
+      ? {
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            message: "Invalid email address",
+          },
+        }
+      : type === "url"
+      ? {
+          pattern: {
+            value:
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
+            message: "Invalid URL",
+          },
+        }
+      : {};
+
+  // מיזוג: base + type + rules (העדפה לכללים שב־rules)
+  const finalRules = { ...baseRules, ...typeRules, ...(rules || {}) };
+
   return (
     <div className="flex flex-col gap-1 w-full">
       <label
@@ -26,31 +55,13 @@ const InputField = ({
         placeholder={placeholder}
         className={`${className ? className : ""} 
           px-2 py-2 border outline-none bg-white text-slate-800 rounded
-          ${errors[id]?.message ? "border-red-500" : "border-slate-300"}`}
-        {...register(id, {
-          required: { value: required, message: message },
-          minLength: min
-            ? { value: min, message: `Minimum ${min} characters is required` }
-            : undefined,
-          pattern:
-            type === "email"
-              ? {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                }
-              : type === "url"
-              ? {
-                  value:
-                    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
-                  message: "Invalid URL",
-                }
-              : undefined,
-        })}
+          ${errors?.[id]?.message ? "border-red-500" : "border-slate-300"}`}
+        {...register(id, finalRules)}
       />
 
-      {errors[id]?.message && (
+      {errors?.[id]?.message && (
         <p className="text-sm font-semibold text-red-600 mt-1">
-          {errors[id]?.message}
+          {errors[id].message}
         </p>
       )}
     </div>

@@ -64,8 +64,9 @@ public class JwtUtils {
 
         // Create a cookie with the JWT token
         return ResponseCookie.from(jwtCookie, jwt)
-                .httpOnly(false) // Prevents JavaScript access
+                .httpOnly(true) // Prevents JavaScript access
                 .secure(true) // Use secure cookies in production (HTTPS)
+                .sameSite("None")
                 .path("/api") // Cookie is valid for the entire application
                 .maxAge(24 * 60 * 60) // Set cookie expiration based on JWT expiration
                 .build();
