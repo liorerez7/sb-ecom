@@ -123,7 +123,10 @@ export const registerNewUser = (sendData, toast, reset, navigate, setLoader) => 
         setLoader(true);
         const {data} = await api.post('/auth/signup', sendData);
         toast.success(data?.message || "User registered successfully");
+        dispatch({ type: "IS_SUCCESS" });
         reset();
+        dispatch({ type: "IS_SUCCESS" });
+
         navigate('/login');
     } catch (error) {
         console.log(error);
@@ -161,10 +164,11 @@ export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModa
             "state": "California"
         }
 
-        console.log("debugging: ", sendDataDebug)
+        console.log("debugging: ", sendData)
 
-        const {data} = await api.post("/addresses", sendDataDebug);
+        const {data} = await api.post("/addresses", sendData);
         toast.success("Address added successfully");
+        dispatch({type: "IS_SUCCESS"});
     } catch (error) {
         console.error("❌ POST /addresses failed:");
         console.error("⛔ Error message:", error?.message);
@@ -178,3 +182,23 @@ export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModa
     }
 
 }
+
+export const getUserAddresses = () => async (dispatch, getState) => {
+
+    const {user} = getState().auth;
+
+    try {
+        dispatch({type: 'IS_FETCHING'});
+        const { data } = await api.get(`/users/addresses`); // maybe only : "/addresses" . need to check with him again
+        dispatch({ 
+            type: 'USER_ADDRESSES',
+            payload: data,
+         });
+         dispatch({type: 'IS_SUCCESS'});
+
+    } catch (error) {
+        dispatch({
+            type: 'IS_ERROR',
+            payload: error?.response?.data?.message || "Failed to fetch addresses",});
+    }
+};

@@ -24,27 +24,27 @@ public class Address {
     private Long AddressId;
 
     @NotBlank
-    @Size(min = 5, message = "Street name must be at least 5 characters")
+    @Size(min = 1, message = "Street name must be at least 5 characters")
     private String street;
 
     @NotBlank
-    @Size(min = 5, message = "Building name must be at least 5 characters")
+    @Size(min = 1, message = "Building name must be at least 5 characters")
     private String buildingName;
 
     @NotBlank
-    @Size(min = 3, message = "City name must be at least 5 characters")
+    @Size(min = 1, message = "City name must be at least 5 characters")
     private String city;
 
     @NotBlank
-    @Size(min = 2, message = "State name must be at least 2 characters")
+    @Size(min = 1, message = "State name must be at least 2 characters")
     private String state;
 
     @NotBlank
-    @Size(min = 2, message = "Country name must be at least 2 characters")
+    @Size(min = 1, message = "Country name must be at least 2 characters")
     private String country;
 
     @NotBlank
-    @Size(min = 5, max = 10, message = "Zip code must be between 5 and 10 characters")
+    @Size(min = 1, max = 50, message = "Zip code must be between 5 and 10 characters")
     private String zipCode;
 
     @ManyToOne
