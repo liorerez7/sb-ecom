@@ -144,6 +144,7 @@ export const logOutUser = (toast, navigate) => (dispatch) => {
 export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModal) => async (dispatch, getState) => {
     
     dispatch({type: "BUTTON_LOADER"});
+    const {user} = getState().auth;
 
     try {
         const {data} = await api.post("/addresses", sendData);
