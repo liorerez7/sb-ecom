@@ -3,6 +3,7 @@ package com.ecommerce.project.security.jwt;
 import com.ecommerce.project.security.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -46,9 +47,24 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // Log the URI of the request (useful for debugging)
-        logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
+        logger.debug("=== AuthTokenFilter Debug ===");
+        logger.debug("Request URI: {}", request.getRequestURI());
+        logger.debug("Request Method: {}", request.getMethod());
 
+        // ✅ הוספת debug ל-cookies
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                logger.debug("Cookie: {} = {}", cookie.getName(), cookie.getValue());
+            }
+        } else {
+            logger.debug("No cookies found in request");
+        }
+
+
+        logger.info("🔍 [AuthTokenFilter] בקשה: {} {}", request.getMethod(), request.getRequestURI());
+        logger.info("🔍 Origin: {}", request.getHeader("Origin"));
+        logger.info("🔍 Cookie Header: {}", request.getHeader("Cookie"));
 
 
         try {
@@ -57,6 +73,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
             // If token is found and is valid, proceed to authenticate
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+
+                logger.info("✅ JWT תקף, ממשיכים לאימות מול בסיס נתונים...");
+
 
                 // Extract the username from the JWT payload
                 String username = jwtUtils.getUserNameFromJWTToken(jwt);
@@ -82,6 +101,13 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 // Log user roles for debugging
                 logger.debug("Roles from JWT: {}", userDetails.getAuthorities());
             }
+
+            if (jwt == null) {
+                logger.warn("🚫 לא נמצא JWT בבקשה (לא הגיע בקוקי)");
+            } else {
+                logger.info("✅ נמצא JWT בבקשה (מוסתר): {}...{}", jwt.substring(0, 10), jwt.substring(jwt.length() - 10));
+            }
+
 
         } catch (Exception e) {
             // If something goes wrong (e.g. token parsing fails), log the error

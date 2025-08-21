@@ -47,17 +47,6 @@ public class JwtUtils {
      * Extract the JWT token from the Authorization header in the request.
      * Expected format: "Authorization: Bearer <token>"
      */
-//    public String getJwtFromHeader(HttpServletRequest request) {
-//        String bearerToken = request.getHeader("Authorization");
-//
-//        logger.debug("Authorization Header: {}", bearerToken);
-//
-//        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-//            return bearerToken.substring(7); // Remove "Bearer " prefix
-//        }
-//
-//        return null;
-//    }
 
     public ResponseCookie generateJwtCookie(UserDetailsImpl userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal);
@@ -66,7 +55,7 @@ public class JwtUtils {
         return ResponseCookie.from(jwtCookie, jwt)
                 .httpOnly(true) // Prevents JavaScript access
                 .secure(false) // Use secure cookies in production (HTTPS)
-                .sameSite("None")
+                .sameSite("Lax")
                 .path("/api") // Cookie is valid for the entire application
                 .maxAge(24 * 60 * 60) // Set cookie expiration based on JWT expiration
                 .build();
@@ -84,8 +73,11 @@ public class JwtUtils {
         Cookie cookie = WebUtils.getCookie(request, jwtCookie);
 
         if(cookie != null) {
+            logger.info("🍪 [JwtUtils] נמצא קוקי בשם '{}' עם ערך באורך {}", jwtCookie, cookie.getValue().length());
             return cookie.getValue();
         }
+        logger.warn("🚫 [JwtUtils] לא נמצא קוקי בשם '{}'", jwtCookie);
+
 
         return null;
     }

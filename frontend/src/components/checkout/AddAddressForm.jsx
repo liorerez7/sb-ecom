@@ -22,7 +22,7 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
           street: address.street || '',
           city: address.city || '',
           state: address.state || '',
-          pinCode: address.pinCode || '',
+          zipCode: address.zipCode || '',
           country: address.country || '',
         }
       : {
@@ -30,7 +30,7 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
           street: '',
           city: '',
           state: '',
-          pinCode: '',
+          zipCode: '',
           country: '',
         },
   })
@@ -47,7 +47,7 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
         street: '',
         city: '',
         state: '',
-        pinCode: '',
+        zipCode: '',
         country: '',
       })
     }
@@ -101,8 +101,8 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField
-            label="PinCode"
-            id="pinCode"
+            label="ZipCode"
+            id="zipCode"
             type="text"
             placeholder="e.g., 6100000"
             required

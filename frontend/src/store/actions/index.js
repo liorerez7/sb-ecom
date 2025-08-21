@@ -146,15 +146,34 @@ export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModa
     dispatch({type: "BUTTON_LOADER"});
     const {user} = getState().auth;
 
+    console.log("📦 addAddressHandler: start");
+    console.log("📦 Data to send:", sendData);
+
     try {
-        const {data} = await api.post("/addresses", sendData);
+
+        // debug porpuse:
+        const sendDataDebug = {
+            "country": "USA2",
+            "city": "San Francisco",
+            "street": "Market Street",
+            "zipCode": "94103",
+            "buildingName": "Bay Apartments",
+            "state": "California"
+        }
+
+        console.log("debugging: ", sendDataDebug)
+
+        const {data} = await api.post("/addresses", sendDataDebug);
         toast.success("Address added successfully");
     } catch (error) {
-        console.log(error);
+        console.error("❌ POST /addresses failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
         toast.error(error?.response?.data?.message || "Registration failed");
         dispatch({type: "IS_ERROR", payload: null});
-    }
-    finally {
+    } finally {
         setOpenAddressModal(false);
     }
 

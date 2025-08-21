@@ -70,6 +70,8 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
          * }
          */
         final ObjectMapper mapper = new ObjectMapper();
+        logger.warn("🚨 חסימת גישה (401) לנתיב: {} | הסיבה: {}", request.getRequestURI(), authException.getMessage());
+        logger.warn("📡 האם הגיע Origin? {}", request.getHeader("Origin"));
         mapper.writeValue(response.getOutputStream(), body);
     }
 }
