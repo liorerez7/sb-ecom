@@ -4,6 +4,7 @@ import InputField from '../shared/InputField' // עדכן נתיב לפי הפר
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-hot-toast'
 import { addAddressHandler } from '../../store/actions'
+import { useEffect } from 'react'
 
 export const AddAddressForm = ({ address, setOpenAddressModal }) => {
   const dispatch = useDispatch()
@@ -13,6 +14,7 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     mode: 'onTouched',
@@ -36,22 +38,23 @@ export const AddAddressForm = ({ address, setOpenAddressModal }) => {
   })
 
   const onSaveAddressHandler = async (data) => {
-    try {
-      await dispatch(
-        addAddressHandler(data, toast, address?.addressId, setOpenAddressModal)
-      )
-    } finally {
-      // אם לא רוצים לאפס כשעורכים, אפשר לבדוק !address לפני reset
-      reset({
-        buildingName: '',
-        street: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: '',
-      })
-    }
+    
+    dispatch(addAddressHandler(
+      data, toast, address?.addressId, setOpenAddressModal
+    ));
   }
+
+  useEffect(() => {
+    if(address?.addressId) {
+      setValue('buildingName', address?.buildingName);
+      setValue('street', address?.street);
+      setValue('city', address?.city);
+      setValue('state', address?.state);
+      setValue('zipCode', address?.zipCode);
+      setValue('country', address?.country);
+    }
+  }, [address, setValue]);
+  
 
   return (
     <form onSubmit={handleSubmit(onSaveAddressHandler)} className="w-full max-w-md">

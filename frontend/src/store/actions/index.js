@@ -147,28 +147,19 @@ export const logOutUser = (toast, navigate) => (dispatch) => {
 export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModal) => async (dispatch, getState) => {
     
     dispatch({type: "BUTTON_LOADER"});
-    const {user} = getState().auth;
-
-    console.log("📦 addAddressHandler: start");
-    console.log("📦 Data to send:", sendData);
 
     try {
-
-        // debug porpuse:
-        const sendDataDebug = {
-            "country": "USA2",
-            "city": "San Francisco",
-            "street": "Market Street",
-            "zipCode": "94103",
-            "buildingName": "Bay Apartments",
-            "state": "California"
+        if(addressId) {
+            await api.put(`/addresses/${addressId}`, sendData);
+            toast.success("Address updated successfully");
+            dispatch({type: "IS_SUCCESS"});
+        } else {
+                await api.post("/addresses", sendData);
+                toast.success("Address added successfully");
+                dispatch({type: "IS_SUCCESS"});
         }
-
-        console.log("debugging: ", sendData)
-
-        const {data} = await api.post("/addresses", sendData);
-        toast.success("Address added successfully");
-        dispatch({type: "IS_SUCCESS"});
+        dispatch(getUserAddresses());
+        
     } catch (error) {
         console.error("❌ POST /addresses failed:");
         console.error("⛔ Error message:", error?.message);
@@ -202,3 +193,87 @@ export const getUserAddresses = () => async (dispatch, getState) => {
             payload: error?.response?.data?.message || "Failed to fetch addresses",});
     }
 };
+
+
+export const selectUserCheckoutAddress = (address) => {
+    return {
+        type: 'SELECT_CHECKOUT_ADDRESS',
+        payload: address,
+    }
+}
+
+export const deleteUserAddress = (toast, addressId, setOpenDeleteModal) => async (dispatch, getState) => {
+    dispatch({type: "BUTTON_LOADER"});
+    try {
+        await api.delete(`/addresses/${addressId}`);
+        toast.success("Address deleted successfully");
+        dispatch({type: "IS_SUCCESS"});
+        dispatch(getUserAddresses());
+        dispatch(clearCheckoutAddress());
+        setOpenDeleteModal(false);
+    } catch (error) {
+        console.error("❌ DELETE /addresses/:addressId failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
+        toast.error(error?.response?.data?.message || "Failed to delete address");
+        dispatch({type: "IS_ERROR", payload: null});
+    } finally {
+        setOpenDeleteModal(false);
+    }
+
+}
+
+export const clearCheckoutAddress = () => {
+    return {
+        type: 'REMOVE_CHECKOUT_ADDRESS',
+    }
+}
+
+
+export const addPaymentMethod = (method) => {
+    return {
+        type: 'ADD_PAYMENT_METHOD',
+        payload: method
+    }
+}
+
+export const createUserCart = (sendCartItems) => async (dispatch, getState) => {
+    try {
+        dispatch({type: 'IS_FETCHING'});
+        await api.post('/cart/create', sendCartItems);
+        await dispatch(getUserCart());
+
+    } catch (error) {
+        console.error("❌ POST /carts failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
+    }
+} 
+
+
+export const getUserCart = () => async (dispatch, getState) => {
+    try{
+        dispatch({type: 'IS_FETCHING'});
+        const {data} = await api.get("/carts/users/cart");   
+        dispatch({
+            type: 'GET_USER_CART_PRODUCTS', 
+            payload: data.products,
+            totalPrice: data.totalPrice,
+            cartId: data.cartId,
+        });
+
+        localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
+        dispatch({type: 'IS_SUCCESS'});
+
+    } catch (error) {
+        console.error("❌ GET /carts/users/cart failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
+    }
+}

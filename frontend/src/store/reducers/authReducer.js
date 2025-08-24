@@ -1,6 +1,7 @@
 const initialState = {
     user: null,
     address: [],
+    selectedUserCheckoutAddress: null, 
 }
 
 export const authReducer = (state=initialState, action) => {
@@ -13,6 +14,12 @@ export const authReducer = (state=initialState, action) => {
 
         case 'LOGOUT_USER':
             return {user: null, address: []};
+
+        case 'SELECT_CHECKOUT_ADDRESS':
+            return {...state, selectedUserCheckoutAddress: action.payload};
+
+        case 'REMOVE_CHECKOUT_ADDRESS':
+            return {...state, selectedUserCheckoutAddress: null};
 
         default:
             return state
