@@ -196,6 +196,8 @@ export const getUserAddresses = () => async (dispatch, getState) => {
 
 
 export const selectUserCheckoutAddress = (address) => {
+    localStorage.setItem("CHECKOUT_ADDRESS", JSON.stringify(address));
+
     return {
         type: 'SELECT_CHECKOUT_ADDRESS',
         payload: address,
@@ -271,6 +273,58 @@ export const getUserCart = () => async (dispatch, getState) => {
 
     } catch (error) {
         console.error("❌ GET /carts/users/cart failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
+    }
+}
+
+
+export const createStripePaymentSecret= (totalPrice) => async (dispatch, getState) => {
+    try{
+        dispatch({type: 'IS_FETCHING'});
+        const {data} = await api.post("/order/stripe-client-secret", {
+            "amount" : Number(totalPrice) * 100, 
+            "currency": "usd"
+        });   
+        dispatch({
+            type: 'CLIENT_SECRET', 
+            payload: data,
+        });
+        dispatch({type: 'IS_SUCCESS'});
+
+        localStorage.setItem("client-secret", JSON.stringify(data));
+
+    } catch (error) {
+        console.error("❌ POST /order/stripe-client-secret failed:");
+        console.error("⛔ Error message:", error?.message);
+        console.error("📨 error.response:", error?.response);
+        console.error("📄 error.response.data:", error?.response?.data);
+        console.error("🔁 Full Axios error:", error);
+    }
+}
+
+
+export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading, toast) => async (dispatch, getState) => {
+    try{
+        dispatch({type: 'IS_FETCHING'});
+        const { data } = await api.post("/order/users/payments/Stripe",sendData);   
+
+        if(data){
+            localStorage.removeItem('cartItems');
+            localStorage.removeItem('client-secret');
+            localStorage.removeItem('CHECKOUT_ADDRESS');
+            
+            dispatch({type: 'REMOVE_CLIENT_SECRET_ADDRESS'});
+            dispatch({type: 'CLEAR CART'});
+            toast.success("Payment Successful");
+        }
+        else{
+            dispatch(setErrorMessage("Payment Failed"));
+        }
+    } catch (error) {
+        console.error("❌ POST /order/users/payments/Stripe failed:");
         console.error("⛔ Error message:", error?.message);
         console.error("📨 error.response:", error?.response);
         console.error("📄 error.response.data:", error?.response?.data);
