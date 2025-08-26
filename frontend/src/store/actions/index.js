@@ -355,7 +355,7 @@ export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading,
             toast.success("Payment Successful");
         }
         else{
-            dispatch(setErrorMessage("Payment Failed"));
+            setErrorMessage("Payment Failed");
         }
     } catch (error) {
         console.error("❌ POST /order/users/payments/Stripe failed:");
