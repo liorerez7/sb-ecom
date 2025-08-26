@@ -62,10 +62,15 @@ public class JwtUtils {
     }
 
     public ResponseCookie getCleanJwtCookie() {
-        return ResponseCookie.from(jwtCookie) // Create a cookie to clear the JWT
+        return ResponseCookie.from(jwtCookie, "")
                 .path("/api")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .maxAge(0)      // מוחק את העוגייה
                 .build();
     }
+
 
 
 

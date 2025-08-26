@@ -136,23 +136,30 @@ export const registerNewUser = (sendData, toast, reset, navigate, setLoader) => 
     }
 };
 
-export const logOutUser = (toast, navigate) => (dispatch) => {
-    dispatch({type: 'LOGOUT_USER'});
+export const logOutUser = (toast, navigate) => async (dispatch) => {
+    try {
+        // לקרוא ל־signout כדי למחוק את העוגייה מהשרת
+        await api.post('/auth/signout');
+    } catch (e) {
+        console.error(e);
+    }
 
+    dispatch({ type: 'LOGOUT_USER' });
     dispatch({ type: 'CLEAR_CART' });
     dispatch({ type: 'REMOVE_CLIENT_SECRET_ADDRESS' });
     dispatch({ type: 'REMOVE_CHECKOUT_ADDRESS' });
 
-
+    // למחוק גם idempotency-key
+    localStorage.removeItem('stripe_idem');
     localStorage.removeItem('auth');
     localStorage.removeItem('cartItems');
-
     localStorage.removeItem('CHECKOUT_ADDRESS');
     localStorage.removeItem('client-secret');
 
     toast.success("Logged out successfully");
     navigate('/login');
 };
+
 
 
 export const addAddressHandler = (sendData, toast, addressId, setOpenAddressModal) => async (dispatch, getState) => {
