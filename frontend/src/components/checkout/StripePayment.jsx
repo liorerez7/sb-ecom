@@ -8,13 +8,15 @@ import PaymentForm from './PaymentForm';
 import { createStripePaymentSecret } from '../../store/actions';
 import { Skeleton } from '../shared/Skeleton';
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+
 function StripePayment() {
 
   const dispatch = useDispatch();
   const {clientSecret} = useSelector((state) => state.auth);
   const {totalPrice} = useSelector((state) => state.carts);
   const {isLoading, errorMessage} = useSelector((state) => state.errors);
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
   const {user, selectedUserCheckoutAddress} = useSelector((state) => state.auth);
 
   const initRef = useRef(false);

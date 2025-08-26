@@ -149,7 +149,7 @@ export const logOutUser = (toast, navigate) => async (dispatch) => {
     dispatch({ type: 'REMOVE_CLIENT_SECRET_ADDRESS' });
     dispatch({ type: 'REMOVE_CHECKOUT_ADDRESS' });
 
-    // למחוק גם idempotency-key
+
     localStorage.removeItem('stripe_idem');
     localStorage.removeItem('auth');
     localStorage.removeItem('cartItems');
