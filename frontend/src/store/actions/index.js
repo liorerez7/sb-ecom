@@ -284,7 +284,24 @@ export const getUserCart = () => async (dispatch, getState) => {
 export const createStripePaymentSecret= (sendData) => async (dispatch, getState) => {
     try{
         dispatch({type: 'IS_FETCHING'});
-        const {data} = await api.post("/order/stripe-client-secret", sendData);
+
+
+        let idem = localStorage.getItem('stripe_idem');
+        if (!idem) {
+            idem = (crypto?.randomUUID && crypto.randomUUID()) || String(Date.now());
+            localStorage.setItem('stripe_idem', idem);
+        }
+
+        sendData = {
+            ...sendData,
+            metadata: { ...(sendData.metadata || {}), idempotencyKey: idem },
+        };
+
+
+        const {data} = await api.post("/order/stripe-client-secret", sendData, {
+            headers: {'Stripe-Idempotency-Key': idem}
+        });
+
 
         dispatch({
             type: 'CLIENT_SECRET', 

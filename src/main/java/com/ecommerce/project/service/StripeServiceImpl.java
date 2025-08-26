@@ -6,6 +6,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.CustomerSearchResult;
 import com.stripe.model.PaymentIntent;
+import com.stripe.net.RequestOptions;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerSearchParams;
 import com.stripe.param.PaymentIntentCreateParams;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -65,7 +67,8 @@ public class StripeServiceImpl implements StripeService{
             customer = customers.getData().getFirst();
         }
 
-        PaymentIntentCreateParams params =
+
+        PaymentIntentCreateParams.Builder builder =
                 PaymentIntentCreateParams.builder()
                         .setAmount(stripePaymentDTO.getAmount())
                         .setCurrency(stripePaymentDTO.getCurrency())
@@ -75,9 +78,40 @@ public class StripeServiceImpl implements StripeService{
                                 PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
                                         .setEnabled(true)
                                         .build()
-                        )
-                        .build();
+                        );
 
-        return PaymentIntent.create(params);
+        if (stripePaymentDTO.getMetadata() != null) {
+            for (Map.Entry<String, String> e : stripePaymentDTO.getMetadata().entrySet()) {
+                builder.putMetadata(e.getKey(), e.getValue());
+            }
+        }
+
+        PaymentIntentCreateParams params = builder.build();
+
+        // Idempotency-Key מהלקוח (נשלח ב-metadata)
+        String idemKey = stripePaymentDTO.getMetadata() != null
+                ? stripePaymentDTO.getMetadata().get("idempotencyKey")
+                : null;
+
+        RequestOptions options = RequestOptions.builder()
+                .setIdempotencyKey(idemKey)  // ← זה החשוב
+                .build();
+
+        return PaymentIntent.create(params, options);
+
+//        PaymentIntentCreateParams params =
+//                PaymentIntentCreateParams.builder()
+//                        .setAmount(stripePaymentDTO.getAmount())
+//                        .setCurrency(stripePaymentDTO.getCurrency())
+//                        .setCustomer(customer.getId())
+//                        .setDescription(stripePaymentDTO.getDescription())
+//                        .setAutomaticPaymentMethods(
+//                                PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
+//                                        .setEnabled(true)
+//                                        .build()
+//                        )
+//                        .build();
+//
+//        return PaymentIntent.create(params);
     }
 }
