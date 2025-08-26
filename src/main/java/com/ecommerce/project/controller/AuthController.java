@@ -13,6 +13,7 @@ import com.ecommerce.project.security.response.MessageResponse;
 import com.ecommerce.project.security.response.UserInfoResponse;
 import com.ecommerce.project.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
+import org.apache.naming.factory.SendMailFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -80,7 +81,7 @@ public class AuthController {
 //        UserInfoResponse response = new UserInfoResponse(userDetails.getId(), jwtToken,
 //                userDetails.getUsername(), roles);
         UserInfoResponse response = new UserInfoResponse(String.valueOf(userDetails.getId()),
-                userDetails.getUsername(), roles);
+                userDetails.getUsername(), roles, userDetails.getEmail(), jwtCookie.toString());
 
 
         //return new ResponseEntity<>(response, HttpStatus.OK);

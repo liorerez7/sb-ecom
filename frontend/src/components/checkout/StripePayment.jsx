@@ -1,5 +1,5 @@
 import { Elements } from '@stripe/react-stripe-js'
-import React from 'react'
+import React, {useRef} from 'react'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux';
 import { loadStripe } from '@stripe/stripe-js';
@@ -15,12 +15,31 @@ function StripePayment() {
   const {totalPrice} = useSelector((state) => state.carts);
   const {isLoading, errorMessage} = useSelector((state) => state.errors);
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+  const {user, selectedUserCheckoutAddress} = useSelector((state) => state.auth);
+
+  const initRef = useRef(false);
 
   useEffect(() => {
+
+      if(initRef.current) return;
+
     if (!clientSecret) {
-      dispatch(createStripePaymentSecret(totalPrice));
+
+        initRef.current = true;
+        const sendData = {
+            amount: Number(totalPrice) * 100,
+            currency: "USD",
+            email: user.email,
+            name: user.username + "",
+            address: selectedUserCheckoutAddress,
+            description: "Order for " + user.email,
+            metadata: {
+                test: 1,
+            }
+        }
+      dispatch(createStripePaymentSecret(sendData));
     }
-  }, [clientSecret]);
+  }, [clientSecret, dispatch]);
 
   if(isLoading){
     return (
