@@ -5,13 +5,14 @@ import Avatar from "@mui/material/Avatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { BiUser } from "react-icons/bi";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaUserShield } from "react-icons/fa";
 import { IoExitOutline } from "react-icons/io5";
 import BackDrop from "./BackDrop";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logOutUser } from "../store/actions";
 import { toast } from "react-hot-toast";
+
 
 const UserMenu = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -31,6 +32,9 @@ const UserMenu = () => {
   };
 
   const user = useSelector((state) => state.auth.user);
+  const roles = Array.isArray(user?.roles) ? user.roles : [];
+  const isAdmin = roles.includes("ROLE_ADMIN");
+  const isSeller = roles.includes("ROLE_SELLER");
 
   return (
     <div>
@@ -69,6 +73,16 @@ const UserMenu = () => {
             <span>Orders</span>
           </MenuItem>
         </Link>
+
+      {(isAdmin || isSeller) && (
+                   <Link to={isAdmin ? "/admin" : "/admin/orders"}>
+                         <MenuItem onClick={handleClose}>
+                           <FaUserShield className="text-xl mr-2" />
+                           <span>{isAdmin ? "Admin Panel" : "Seller Panel"}</span>
+                         </MenuItem>
+                       </Link>
+        )}
+
         <MenuItem onClick={logoutHandler}>
           <IoExitOutline className="text-xl mr-2" />
           <span>Logout</span>

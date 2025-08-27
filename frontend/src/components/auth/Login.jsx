@@ -6,7 +6,7 @@ import { AiOutlineLogin } from "react-icons/ai";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import { useDispatch } from "react-redux";
 import { authenticateSignInUser } from "../../store/actions";
-import { toast } from "react-hot-toast";
+import toast  from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();

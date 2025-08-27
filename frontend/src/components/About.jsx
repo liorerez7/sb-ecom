@@ -1,4 +1,4 @@
-import placeHolderForImage from "../assets/sliders/1.jpg";
+import placeHolderForImage from "../assets/sliders/bannerImageOne.jpg";
 
 const About = () => {
     return (

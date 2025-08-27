@@ -1,7 +1,7 @@
 
-import bannerImageOne from "../assets/sliders/1.jpg";
-import bannerImageTwo from "../assets/sliders/2.jpg";
-import bannerImageThree from "../assets/sliders/3.jpg";
+import bannerImageOne from "../assets/sliders/bannerImageOne.jpg";
+import bannerImageTwo from "../assets/sliders/bannerImageTwo.jpg";
+import bannerImageThree from "../assets/sliders/bannerImageThree.jpg";
 
 export const bannerImages = [bannerImageOne, bannerImageTwo, bannerImageThree];
 

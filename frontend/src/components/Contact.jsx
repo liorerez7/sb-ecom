@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@headlessui/react";
-import placeHolderForImage from "../assets/sliders/1.jpg";
+import placeHolderForImage from "../assets/sliders/bannerImageOne.jpg";
 import { FaPhone } from "react-icons/fa";
 
 const Contact = () => {
