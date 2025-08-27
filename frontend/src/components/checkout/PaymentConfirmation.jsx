@@ -42,6 +42,8 @@ const PaymentConfirmation = () => {
 
         onceRef.current = true;
 
+        try { localStorage.removeItem('stripe_idem'); } catch (_) {}
+
         if (paymentIntent && clientSecret && redirectedStatus && cart && cart?.length > 0) {
             
             const sendData = {
