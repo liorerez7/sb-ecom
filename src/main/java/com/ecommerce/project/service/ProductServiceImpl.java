@@ -5,12 +5,14 @@ import com.ecommerce.project.execptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.model.Product;
+import com.ecommerce.project.model.User;
 import com.ecommerce.project.payload.CartDTO;
 import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.payload.ProductResponse;
 import com.ecommerce.project.reposetories.CartRepository;
 import com.ecommerce.project.reposetories.CategoryRepository;
 import com.ecommerce.project.reposetories.ProductRepository;
+import com.ecommerce.project.util.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +36,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AuthUtil authUtil;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -61,7 +66,15 @@ public class ProductServiceImpl implements ProductService {
                 ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
-        Page<Product> pageProducts = productRepository.findByProductNameLikeIgnoreCase(keyword, pageDetails);
+
+//        Page<Product> pageProducts = productRepository.findByProductNameLikeIgnoreCase(keyword, pageDetails);
+//        return getProductResponse(pageProducts);
+
+        String like = (keyword != null && (keyword.contains("%") || keyword.contains("_")))
+                ? keyword
+                : "%" + (keyword == null ? "" : keyword) + "%";
+
+        Page<Product> pageProducts = productRepository.findByProductNameLikeIgnoreCase(like, pageDetails);
         return getProductResponse(pageProducts);
     }
 
@@ -88,6 +101,8 @@ public class ProductServiceImpl implements ProductService {
             Product product = modelMapper.map(productDTO, Product.class);
             product.setCategory(category);
             product.setImage("default.png");
+
+            product.setUser(authUtil.getLoggedInUser());
 
             // After discount
             product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
@@ -241,4 +256,61 @@ public class ProductServiceImpl implements ProductService {
         productResponse.setLastPage(pageProducts.isLast());
         return productResponse;
     }
+
+    @Override
+    public ProductResponse getAllProductsForAdmin(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Product> pageProducts = productRepository.findAll(pageDetails);
+
+        List<ProductDTO> productDTOS = pageProducts.getContent().stream()
+                .map(p -> {
+                    ProductDTO dto = modelMapper.map(p, ProductDTO.class);
+                    dto.setImage(constructImageUrl(p.getImage()));
+                    return dto;
+                })
+                .toList();
+
+        ProductResponse resp = new ProductResponse();
+        resp.setContent(productDTOS);
+        resp.setPageNumber(pageProducts.getNumber());
+        resp.setPageSize(pageProducts.getSize());
+        resp.setTotalElements(pageProducts.getTotalElements());
+        resp.setTotalPages(pageProducts.getTotalPages());
+        resp.setLastPage(pageProducts.isLast());
+        return resp;
+    }
+
+    @Override
+    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        // 🔽 נדרש שיוך מוכר במוצר (חלק א') כדי שזה יחזיר תוצאות
+        User user = authUtil.getLoggedInUser();
+        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
+
+        List<ProductDTO> productDTOS = pageProducts.getContent().stream()
+                .map(p -> {
+                    ProductDTO dto = modelMapper.map(p, ProductDTO.class);
+                    dto.setImage(constructImageUrl(p.getImage()));
+                    return dto;
+                })
+                .toList();
+
+        ProductResponse resp = new ProductResponse();
+        resp.setContent(productDTOS);
+        resp.setPageNumber(pageProducts.getNumber());
+        resp.setPageSize(pageProducts.getSize());
+        resp.setTotalElements(pageProducts.getTotalElements());
+        resp.setTotalPages(pageProducts.getTotalPages());
+        resp.setLastPage(pageProducts.isLast());
+        return resp;
+    }
+
+
 }

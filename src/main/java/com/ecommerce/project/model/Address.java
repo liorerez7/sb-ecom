@@ -1,5 +1,6 @@
 package com.ecommerce.project.model;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -43,6 +44,7 @@ public class Address {
     @Size(min = 1, message = "Country name must be at least 2 characters")
     private String country;
 
+    @JsonAlias("pincode")
     @NotBlank
     @Size(min = 1, max = 50, message = "Zip code must be between 5 and 10 characters")
     private String zipCode;

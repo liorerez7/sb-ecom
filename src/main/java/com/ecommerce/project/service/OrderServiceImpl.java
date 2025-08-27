@@ -6,9 +6,15 @@ import com.ecommerce.project.model.*;
 import com.ecommerce.project.payload.OrderDTO;
 import com.ecommerce.project.payload.OrderItemDTO;
 import com.ecommerce.project.payload.OrderRequestDTO;
+import com.ecommerce.project.payload.OrderResponse;
 import com.ecommerce.project.reposetories.*;
+import com.ecommerce.project.util.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +27,9 @@ public class OrderServiceImpl implements OrderService{
 
     @Autowired
     private CartRepository cartRepository;
+
+    @Autowired
+    private AuthUtil authUtil;
 
     @Autowired
     private AddressRepository addressRepository;
@@ -60,7 +69,7 @@ public class OrderServiceImpl implements OrderService{
         order.setEmail(emailId);
         order.setOrderDate(LocalDate.now());
         order.setTotalAmount(cart.getTotalPrice());
-        order.setOrderStatus("Order Accepted !");
+        order.setOrderStatus("Accepted");
         order.setAddress(address);
 
         Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
@@ -106,5 +115,73 @@ public class OrderServiceImpl implements OrderService{
 
         orderDTO.setAddressId(addressId);
         return orderDTO;
+    }
+
+
+    @Override
+    public OrderResponse getAllOrders(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Order> pageOrders = orderRepository.findAll(pageDetails);
+
+        List<OrderDTO> orderDTOs = pageOrders.getContent().stream()
+                .map(o -> modelMapper.map(o, OrderDTO.class))
+                .toList();
+
+        OrderResponse resp = new OrderResponse();
+        resp.setContent(orderDTOs);
+        resp.setPageNumber(pageOrders.getNumber());
+        resp.setPageSize(pageOrders.getSize());
+        resp.setTotalElements(pageOrders.getTotalElements());
+        resp.setTotalPages(pageOrders.getTotalPages());
+        resp.setLastPage(pageOrders.isLast());
+        return resp;
+    }
+
+    @Override
+    public OrderDTO updateOrder(Long orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "orderId", orderId));
+        order.setOrderStatus(status);
+        orderRepository.save(order);
+        return modelMapper.map(order, OrderDTO.class);
+    }
+
+    @Override
+    public OrderResponse getAllSellerOrders(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        User seller = authUtil.getLoggedInUser();
+        Page<Order> pageOrders = orderRepository.findAll(pageDetails);
+
+        // סינון לפי מוצרים של המוכר
+        List<Order> sellerOrders = pageOrders.getContent().stream()
+                .filter(order -> order.getOrderItems().stream()
+                        .anyMatch(oi -> {
+                            Product p = oi.getProduct();
+                            return p != null && p.getUser() != null &&
+                                    p.getUser().getId().equals(seller.getId());
+                        }))
+                .toList();
+
+        List<OrderDTO> orderDTOs = sellerOrders.stream()
+                .map(o -> modelMapper.map(o, OrderDTO.class))
+                .toList();
+
+        OrderResponse resp = new OrderResponse();
+        resp.setContent(orderDTOs);
+        resp.setPageNumber(pageOrders.getNumber());
+        resp.setPageSize(pageOrders.getSize());
+        resp.setTotalElements(pageOrders.getTotalElements());
+        resp.setTotalPages(pageOrders.getTotalPages());
+        resp.setLastPage(pageOrders.isLast());
+        return resp;
     }
 }
