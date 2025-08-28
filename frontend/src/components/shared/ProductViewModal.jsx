@@ -1,14 +1,12 @@
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
+import { Divider } from '@mui/material';
+import { MdClose, MdDone } from 'react-icons/md';
+import Status from './Status';
 
 function ProductViewModal({ open, setOpen, product, isAvailable }) {
-  
-  function close() {
-    setOpen(false);
-  }
-
   if (!product) return null;
 
-  const { 
+  const {
     id,
     productName,
     image,
@@ -16,94 +14,88 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
     quantity,
     price,
     discount,
-    specialPrice
+    specialPrice,
   } = product;
 
+  const close = () => setOpen(false);
+
   return (
-    <Dialog open={open} as="div" className="relative z-10 focus:outline-none" onClose={close}>
+    <Dialog open={open} as="div" className="relative z-10" onClose={close}>
       <DialogBackdrop className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-      <div className="fixed inset-0 transition-opacity" />
       <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-4">
           <DialogPanel
             transition
-            className="w-full max-w-lg rounded-xl bg-white shadow-xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0"
+            className="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all md:max-w-[620px] md:min-w-[620px] w-full"
           >
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <DialogTitle as="h3" className="text-xl font-semibold text-gray-900">
-                  {productName}
-                </DialogTitle>
-                <button
-                  onClick={close}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+            {image && (
+              <div className="flex justify-center aspect-3/2">
+                <img src={image} alt={productName} />
               </div>
-              
-              <div className="mb-4">
-                <img
-                  src={image}
-                  alt={productName}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              </div>
-              
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                {description}
-              </p>
-              
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex flex-col">
-                  {specialPrice && isAvailable ? (
-                    <>
-                      <span className="text-gray-500 text-sm line-through">
+            )}
+
+            <div className="px-6 pt-10 pb-2">
+              <DialogTitle
+                as="h1"
+                className="lg:text-3xl sm:text-2xl text-xl font-semibold leading-6 text-gray-800 mb-4"
+              >
+                {productName}
+              </DialogTitle>
+
+              <div className="space-y-2 text-gray-700 pb-4">
+                <div className="flex items-center justify-between gap-2">
+                  {specialPrice ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-400 line-through">
                         ${Number(price).toFixed(2)}
                       </span>
-                      <span className="text-2xl font-bold text-green-600">
+                      <span className="sm:text-xl font-semibold text-slate-700">
                         ${Number(specialPrice).toFixed(2)}
                       </span>
-                    </>
+                    </div>
                   ) : (
-                    <span className="text-2xl font-bold text-gray-900">
-                      {isAvailable ? `${Number(price).toFixed(2)}` : 'Out of Stock'}
+                    <span className="text-xl font-bold">
+                      ${Number(price).toFixed(2)}
                     </span>
                   )}
+
+                  {isAvailable ? (
+                    <Status
+                      text="In Stock"
+                      icon={MdDone}
+                      bg="bg-teal-200"
+                      color="text-teal-900"
+                    />
+                  ) : (
+                    <Status
+                      text="Out-Of-Stock"
+                      icon={MdClose}
+                      bg="bg-rose-200"
+                      color="text-rose-700"
+                    />
+                  )}
                 </div>
-                
-                <div className="text-sm text-gray-500">
-                  {isAvailable ? `${quantity} in stock` : 'Out of stock'}
-                </div>
+
+                <Divider />
+
+                <p>{description}</p>
               </div>
-              
-              <div className="flex gap-3">
-                {isAvailable ? (
-                  <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
-                    Add to Cart
-                  </button>
-                ) : (
-                  <button disabled className="flex-1 bg-gray-300 text-gray-500 font-semibold py-3 px-4 rounded-lg cursor-not-allowed">
-                    Out of Stock
-                  </button>
-                )}
-                
-                <button
-                  onClick={close}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200"
-                >
-                  Close
-                </button>
-              </div>
+            </div>
+
+            <div className="px-6 py-4 flex justify-end gap-4">
+              <button
+                onClick={close}
+                type="button"
+                className="px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-700 hover:text-slate-800 hover:border-slate-800 rounded-md"
+              >
+                Close
+              </button>
             </div>
           </DialogPanel>
         </div>
       </div>
     </Dialog>
-  )
+  );
 }
 
-
-export default ProductViewModal
+export default ProductViewModal;

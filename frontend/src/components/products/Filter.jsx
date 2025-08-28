@@ -22,9 +22,12 @@ const Filter = ({ categories }) => {
     const [searchTerm, setSearchTerm] = useState("");
 
 
+    // maybe it should be:
+    //   const sortOrder = searchParams.get("sortOrder") || "asc";
+
     useEffect(() => {
         const currentCategory = searchParams.get("category") || "all";
-        const sortOrder = searchParams.get("sortOrder") || "asc";
+        const sortOrder = searchParams.get("sortBy") || "asc";
         const currentSearchTerm = searchParams.get("keyword") || "";
 
         setSelectedCategory(currentCategory);
