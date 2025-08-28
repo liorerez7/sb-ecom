@@ -13,6 +13,11 @@ import PrivateRoute from "./components/PrivateRoute";
 import Register from "./components/auth/Register";
 import Checkout from "./components/checkout/Checkout";
 import PaymentConfirmation from "./components/checkout/PaymentConfirmation";
+import AdminLayout from "./components/admin/AdminLayout";
+import Dashboard from "./components/admin/dashboard/Dashboard";
+import AdminProducts from "./components/admin/products/AdminProducts";
+import Sellers from "./components/admin/sellers/Sellers";
+import Categories from "./components/admin/categories/Categories";
 
 function App() {
   return (
@@ -36,8 +41,18 @@ function App() {
           <Route path="/" element={<PrivateRoute publicPage />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
           </Route>
+
+          <Route element={<PrivateRoute adminOnly />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="sellers" element={<Sellers />} />
+              <Route path="categories" element={<Categories />} />
+            </Route>
+          </Route>
+
+
         </Routes>
       </Router>
       <Toaster position="top-center" />

@@ -210,13 +210,13 @@ public class WebSecurityConfig {
 
             if (userRepository.existsByUsername("seller1")) {
                 User user = userRepository.findByUsername("seller1").orElseThrow();
-                user.setRoles(userRoles);
+                user.setRoles(sellerRoles);
                 userRepository.save(user);
             }
 
             if (userRepository.existsByUsername("admin")) {
                 User user = userRepository.findByUsername("admin").orElseThrow();
-                user.setRoles(userRoles);
+                user.setRoles(adminRoles);
                 userRepository.save(user);
             }
         };
