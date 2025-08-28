@@ -47,3 +47,12 @@
 [28/Aug/2025:05:49:28 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 68236 ms
 [28/Aug/2025:05:49:28 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 49929 ms
 [28/Aug/2025:05:49:29 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 7328 ms
+[28/Aug/2025:05:51:34 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 3324684 ms
+[28/Aug/2025:05:51:35 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 271796 ms
+[28/Aug/2025:05:52:06 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 175684 ms
+[28/Aug/2025:05:52:06 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 76147 ms
+[28/Aug/2025:05:52:16 +0300] 0:0:0:0:0:0:0:1 "POST /api/auth/signin HTTP/1.1" 200 367 425882 ms
+[28/Aug/2025:05:52:16 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 10049 ms
+[28/Aug/2025:05:52:16 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 52284 ms
+[28/Aug/2025:05:52:16 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?undefined HTTP/1.1" 200 1716 41902 ms
+[28/Aug/2025:05:52:16 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 10540 ms
