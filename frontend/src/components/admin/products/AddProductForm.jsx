@@ -7,7 +7,7 @@ import { addNewProductFromDashboard, fetchCategories, updateProductFromDashboard
 import toast from 'react-hot-toast';
 import Spinners from '../../shared/Spinners';
 import SelectTextField from '../../shared/SelectTextField';
-import Skeleton from '../../shared/Skeleton';
+import {Skeleton} from '../../shared/Skeleton';
 import ErrorPage from '../../shared/ErrorPage';
 
 const AddProductForm = ({ setOpen, product, update=false}) => {
