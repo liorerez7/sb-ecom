@@ -1,4 +1,7 @@
 package com.ecommerce.project.service;
 
-public interface AnalyticesService {
+import com.ecommerce.project.payload.AnalyticsResponse;
+
+public interface AnalyticsService {
+    public AnalyticsResponse getAnalyticsData();
 }

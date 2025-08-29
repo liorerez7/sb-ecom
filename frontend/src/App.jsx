@@ -18,6 +18,7 @@ import Dashboard from "./components/admin/dashboard/Dashboard";
 import AdminProducts from "./components/admin/products/AdminProducts";
 import Sellers from "./components/admin/sellers/Sellers";
 import Categories from "./components/admin/categories/Categories";
+import Orders from "./components/admin/orders/Orders";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
               <Route path="products" element={<AdminProducts />} />
               <Route path="sellers" element={<Sellers />} />
               <Route path="categories" element={<Categories />} />
+              <Route path="orders" element={<Orders />} />
             </Route>
           </Route>
 

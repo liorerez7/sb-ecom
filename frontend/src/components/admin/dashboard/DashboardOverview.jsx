@@ -1,4 +1,3 @@
-// מחיקה: import { Icon } from '@mui/material'; // זה שובר את הפרופ Icon שאתה שולח
 
 import React from 'react'
 import { formatRevenue } from '../../../utils/formatPrice';

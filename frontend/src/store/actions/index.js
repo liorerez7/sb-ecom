@@ -365,3 +365,61 @@ export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading,
         console.error("🔁 Full Axios error:", error);
     }
 }
+
+
+export const analyticsAction = () => async (dispatch, getState) => {
+        try {
+            dispatch({ type: "IS_FETCHING"});
+            const { data } = await api.get('/admin/app/analytics');
+            dispatch({
+                type: "FETCH_ANALYTICS",
+                payload: data,
+            })
+            dispatch({ type: "IS_SUCCESS"});
+        } catch (error) {
+            dispatch({ 
+                type: "IS_ERROR",
+                payload: error?.response?.data?.message || "Failed to fetch analytics data",
+            });
+        }
+};
+
+export const getOrdersForDashboard = (queryString, isAdmin = true) => async (dispatch) => {
+    try {
+        dispatch({ type: "IS_FETCHING" });
+        const endpoint = isAdmin ? "/admin/orders" : "/seller/orders";
+        const { data } = await api.get(`${endpoint}?${queryString}`);
+        dispatch({
+            type: "GET_ADMIN_ORDERS",
+            payload: data.content,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize,
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            lastPage: data.lastPage,
+        });
+        dispatch({ type: "IS_SUCCESS" });
+    } catch (error) {
+        console.log(error);
+        dispatch({ 
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "Failed to fetch orders data",
+         });
+    }
+};
+
+export const updateOrderStatusFromDashboard =
+     (orderId, orderStatus, toast, setLoader, isAdmin = true) => async (dispatch, getState) => {
+    try {
+        setLoader(true);
+        const endpoint = isAdmin ? "/admin/orders/" : "/seller/orders/";
+        const { data } = await api.put(`${endpoint}${orderId}/status`, { status: orderStatus});
+        toast.success(data.message || "Order updated successfully");
+        await dispatch(getOrdersForDashboard());
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Internal Server Error");
+    } finally {
+        setLoader(false)
+    }
+};
