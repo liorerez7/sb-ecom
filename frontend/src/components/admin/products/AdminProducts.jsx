@@ -47,6 +47,7 @@ const AdminProducts = () => {
   const tableRecords = products?.map((item) => {
   return {
     id: item.productId,
+    productId: item.productId,
     productName: item.productName,
     description: item.description,
     discount: item.discount,
@@ -87,7 +88,8 @@ const handlePaginationChange = (paginationModel) => {
 
 
 const onDeleteHandler = () => {
-  dispatch(deleteProduct(setLoader, selectedProduct?.id, toast, setOpenDeleteModal, isAdmin));
+  //dispatch(deleteProduct(setLoader, selectedProduct?.id, toast, setOpenDeleteModal, isAdmin));
+  dispatch(deleteProduct(setLoader, selectedProduct?.productId, toast, setOpenDeleteModal, isAdmin));
 };
 
   const emptyProduct = !products || products?.length ===0;

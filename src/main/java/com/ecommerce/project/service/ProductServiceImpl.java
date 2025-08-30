@@ -168,15 +168,37 @@ public class ProductServiceImpl implements ProductService {
         Product productFromDB = productRepository.findById(productId).orElseThrow(() ->
                 new ResourceNotFoundException("Product", "productId", productId));
 
+//        Product product = modelMapper.map(productDTO, Product.class);
+//        productFromDB.setPrice(product.getPrice());
+//        productFromDB.setProductName(product.getProductName());
+//        productFromDB.setDescription(product.getDescription());
+//        productFromDB.setQuantity(product.getQuantity());
+//        productFromDB.setDiscount(product.getDiscount());
+//        productFromDB.setSpecialPrice(product.getPrice() - (product.getDiscount()/100) * product.getPrice());
+//        productFromDB.setImage(product.getImage());
+//        productFromDB.setCategory(product.getCategory());
         Product product = modelMapper.map(productDTO, Product.class);
         productFromDB.setPrice(product.getPrice());
         productFromDB.setProductName(product.getProductName());
         productFromDB.setDescription(product.getDescription());
         productFromDB.setQuantity(product.getQuantity());
         productFromDB.setDiscount(product.getDiscount());
-        productFromDB.setSpecialPrice(product.getPrice() - (product.getDiscount()/100) * product.getPrice());
+        productFromDB.setSpecialPrice(
+                product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice()
+        );
         productFromDB.setImage(product.getImage());
-        productFromDB.setCategory(product.getCategory());
+// קטגוריה תעודכן רק אם נשלחה ב־DTO
+        if (product.getCategory() != null) {
+            productFromDB.setCategory(product.getCategory());
+
+        }
+
+        if (product.getImage() != null) {
+            productFromDB.setImage(product.getImage());
+        }
+
+       
+
 
         Product savedProduct = productRepository.save(productFromDB);
 

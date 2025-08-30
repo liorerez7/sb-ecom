@@ -43,7 +43,8 @@ const ImageUploadForm = ({ setOpen, product }) => {
         const formData = new FormData();
         formData.append("image", selectedFile);
 
-        dispatch(updateProductImageFromDashboard(formData, product.id, toast, setLoader, setOpen, isAdmin));
+        //dispatch(updateProductImageFromDashboard(formData, product.id, toast, setLoader, setOpen, isAdmin));
+        dispatch(updateProductImageFromDashboard(formData, product.productId, toast, setLoader, setOpen, isAdmin));
     };
 
     const handleClearImage = () => {

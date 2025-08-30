@@ -454,16 +454,22 @@ export const updateProductFromDashboard =
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
-        await api.put(`${endpoint}${sendData.id}`, sendData);
+        await api.put(`${endpoint}${sendData.productId}`, sendData);
         toast.success("Product update successful");
         reset();
         setLoader(false);
         setOpen(false);
-        await dispatch(dashboardProductsAction());
-    } catch (error) {
-        toast.error(error?.response?.data?.description || "Product update failed");
+    //     await dispatch(dashboardProductsAction());
+    // } catch (error) {
+    //     toast.error(error?.response?.data?.description || "Product update failed");
      
+    // }
+
+    await dispatch(dashboardProductsAction("", isAdmin));
+    } catch (error) {
+    toast.error(error?.response?.data?.message || "Product update failed");
     }
+
 };
 
 export const addNewProductFromDashboard = 
@@ -477,13 +483,22 @@ export const addNewProductFromDashboard =
             toast.success("Product created successfully");
             reset();
             setOpen(false);
-            await dispatch(dashboardProductsAction());
+        //     await dispatch(dashboardProductsAction());
+        // } catch (error) {
+        //     console.error(err);
+        //     toast.error(err?.response?.data?.description || "Product creation failed");
+        // } finally {
+        //     setLoader(false);
+        // }
+
+        await dispatch(dashboardProductsAction("", isAdmin)); // העברת queryString ריק
         } catch (error) {
-            console.error(err);
-            toast.error(err?.response?.data?.description || "Product creation failed");
+            console.error(error);
+            toast.error(error?.response?.data?.message || "Product creation failed");
         } finally {
             setLoader(false);
         }
+
 };
 
 
@@ -496,7 +511,8 @@ export const deleteProduct =
         toast.success("Product deleted successfully");
         setLoader(false);
         setOpenDeleteModal(false);
-        await dispatch(dashboardProductsAction());
+        //await dispatch(dashboardProductsAction());
+        await dispatch(dashboardProductsAction("", isAdmin));
     } catch (error) {
         console.log(error);
         toast.error(
@@ -515,7 +531,8 @@ export const updateProductImageFromDashboard =
         toast.success("Image upload successful");
         setLoader(false);
         setOpen(false);
-        await dispatch(dashboardProductsAction());
+        //await dispatch(dashboardProductsAction());
+        await dispatch(dashboardProductsAction("", isAdmin));
     } catch (error) {
         toast.error(error?.response?.data?.description || "Product Image upload failed");
      
