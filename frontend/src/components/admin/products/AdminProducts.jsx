@@ -54,7 +54,7 @@ const AdminProducts = () => {
     image: item.image,
     price: item.price,
     quantity: item.quantity,
-    specialPrice: item.specialPrice,
+    specialPrice: parseFloat(item.specialPrice),
   }
 });
 

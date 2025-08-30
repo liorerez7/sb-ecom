@@ -197,7 +197,7 @@ public class ProductServiceImpl implements ProductService {
             productFromDB.setImage(product.getImage());
         }
 
-       
+
 
 
         Product savedProduct = productRepository.save(productFromDB);
