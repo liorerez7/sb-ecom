@@ -42,6 +42,7 @@ public class ProductController {
                                                           @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_DIR) String sortOrder) {
 
         ProductResponse productResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder, keyword, category);
+        System.out.println("product response: " + productResponse);
         return new ResponseEntity<>(productResponse, HttpStatus.OK);
     }
 
@@ -73,6 +74,8 @@ public class ProductController {
 
     @DeleteMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId) {
+        //debug:
+        System.out.println("delete product with id: " + productId);
         ProductDTO productDTO = productService.deleteProduct(productId);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }

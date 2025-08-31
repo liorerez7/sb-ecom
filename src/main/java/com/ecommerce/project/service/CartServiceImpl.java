@@ -191,25 +191,77 @@ public class CartServiceImpl implements CartService {
         return cartDTO;
     }
 
+//    @Transactional
+//    @Override
+//    public String deleteProductFromCart(Long cartId, Long productId) {
+//
+//        Cart cart = cartRepository.findById(cartId).orElseThrow(
+//                () -> new ResourceNotFoundException("Cart", "cartId", cartId)
+//        );
+//
+//        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+//        if (cartItem == null) {
+//            throw new APIException("Product with ID " + productId + " not found in cart with ID " + cartId);
+//        }
+//
+//        cart.setTotalPrice(cart.getTotalPrice() - cartItem.getProductPrice() * cartItem.getQuantity());
+//
+//        cartItemRepository.deleteCartItemByProductIdAndCartId(cartId, productId);
+//
+//        return "Product with ID " + productId + " deleted from cart with ID " + cartId;
+//
+//    }
+
     @Transactional
     @Override
     public String deleteProductFromCart(Long cartId, Long productId) {
+        System.out.println("=== CART SERVICE: DELETE PRODUCT FROM CART ===");
+        System.out.println("CartId: " + cartId + ", ProductId: " + productId);
 
         Cart cart = cartRepository.findById(cartId).orElseThrow(
-                () -> new ResourceNotFoundException("Cart", "cartId", cartId)
+                () -> {
+                    System.out.println("ERROR: Cart not found for id: " + cartId);
+                    return new ResourceNotFoundException("Cart", "cartId", cartId);
+                }
         );
+
+        System.out.println("Cart found with " + cart.getCartItems().size() + " items");
 
         CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
         if (cartItem == null) {
+            System.out.println("ERROR: CartItem not found for productId: " + productId + " in cartId: " + cartId);
             throw new APIException("Product with ID " + productId + " not found in cart with ID " + cartId);
         }
 
+        System.out.println("Found CartItem - ID: " + cartItem.getCartItemId());
+
+        // Update cart total
         cart.setTotalPrice(cart.getTotalPrice() - cartItem.getProductPrice() * cartItem.getQuantity());
 
-        cartItemRepository.deleteCartItemByProductIdAndCartId(cartId, productId);
+        // CRITICAL: Remove from both sides of the bidirectional relationship
+        Product product = cartItem.getProduct();
+
+        // Remove cartItem from cart's collection
+        cart.getCartItems().remove(cartItem);
+
+        // Remove cartItem from product's collection
+        product.getProducts().remove(cartItem);
+
+        // Clear the cartItem's references
+        cartItem.setCart(null);
+        cartItem.setProduct(null);
+
+        // Save the updated entities first
+        cartRepository.save(cart);
+        productRepository.save(product);
+
+        // Then delete the cart item
+        cartItemRepository.delete(cartItem);
+
+        System.out.println("Cart item deleted successfully with proper relationship cleanup");
+        System.out.println("=== CART SERVICE: DELETE COMPLETED ===");
 
         return "Product with ID " + productId + " deleted from cart with ID " + cartId;
-
     }
 
     @Override

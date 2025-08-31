@@ -24,16 +24,33 @@ const dispatch = useDispatch();
         handleSubmit,
         reset,
         setValue,
+        watch,
         formState: { errors }
     } = useForm({
         mode: "onTouched"
     });
+
+    const priceValue = watch("price");
+    const discountValue = watch("discount");
+    useEffect(() => {
+        const price = parseFloat(priceValue) || 0;
+        const discount = parseFloat(discountValue) || 0;
+        const special = parseFloat(price - (discount / 100) * price);
+        if (!isNaN(special)) {
+            setValue("specialPrice", special.toFixed(2));
+        }
+    }, [priceValue, discountValue, setValue]);
 
     const saveProductHandler = (data) => {
         if(!update) {
             // create new product logic
             const sendData = {
                 ...data,
+                productId: product.id,
+                price: parseFloat(data.price),
+                discount: parseFloat(data.discount),
+                specialPrice: parseFloat(data.specialPrice),
+                quantity: parseInt(data.quantity),
                 categoryId: selectedCategory.categoryId,
             };
             dispatch(addNewProductFromDashboard(
@@ -42,7 +59,11 @@ const dispatch = useDispatch();
         } else {
             const sendData = {
                 ...data,
-                productId: product.id,
+                productId: product.productId,
+                price: parseFloat(data.price),
+                discount: parseFloat(data.discount),
+                specialPrice: parseFloat(data.specialPrice),
+                quantity: parseInt(data.quantity),
             };
             dispatch(updateProductFromDashboard(sendData, toast, reset, setLoader, setOpen, isAdmin));
         }
@@ -55,7 +76,7 @@ const dispatch = useDispatch();
             setValue("price", product?.price);
             setValue("quantity", product?.quantity);
             setValue("discount", product?.discount);
-            setValue("specialPrice", product?.specialPrice);
+            setValue("specialPrice", parseFloat(product?.specialPrice) || product?.specialPrice);
             setValue("description", product?.description);
         }
     }, [update, product]);
@@ -108,6 +129,7 @@ const dispatch = useDispatch();
                     required
                     id="price"
                     type="number"
+                    step="0.01"
                     message="This field is required*"
                     placeholder="Product Price"
                     register={register}
@@ -130,6 +152,7 @@ const dispatch = useDispatch();
             label="Discount"
             id="discount"
             type="number"
+            step="0.01"
             message="This field is required*"
             placeholder="Product Discount"
             register={register}
@@ -139,10 +162,12 @@ const dispatch = useDispatch();
             label="Special Price"
             id="specialPrice"
             type="number"
+            step="0.01"
             message="This field is required*"
-            placeholder="Product Discount"
+            placeholder="Special Price"
             register={register}
             errors={errors}
+            readOnly
           />
         </div>
 

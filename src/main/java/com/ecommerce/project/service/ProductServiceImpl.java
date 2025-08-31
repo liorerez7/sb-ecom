@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
@@ -52,7 +53,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CartService cartService;
-    private ProductService productService;
+
+
 
     @Override
     public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -90,7 +92,13 @@ public class ProductServiceImpl implements ProductService {
             product.setImage("default.png");
 
             // After discount
-            product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
+            //product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
+            Double specialPrice = productDTO.getSpecialPrice();
+            if (specialPrice == null) {
+                specialPrice = product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice();
+            }
+            product.setSpecialPrice(specialPrice);
+
 
             Product savedProduct = productRepository.save(product);
 
@@ -183,9 +191,18 @@ public class ProductServiceImpl implements ProductService {
         productFromDB.setDescription(product.getDescription());
         productFromDB.setQuantity(product.getQuantity());
         productFromDB.setDiscount(product.getDiscount());
-        productFromDB.setSpecialPrice(
-                product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice()
-        );
+
+//        productFromDB.setSpecialPrice(
+//                product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice()
+//        );
+
+        Double specialPrice = product.getSpecialPrice();
+        if (specialPrice == null) {
+            specialPrice = product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice();
+        }
+        productFromDB.setSpecialPrice(specialPrice);
+
+
         productFromDB.setImage(product.getImage());
 // קטגוריה תעודכן רק אם נשלחה ב־DTO
         if (product.getCategory() != null) {
@@ -222,18 +239,96 @@ public class ProductServiceImpl implements ProductService {
         return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
+
+    //debug this function with prints to find the bug:
+//    @Override
+//    @Transactional
+//    public ProductDTO deleteProduct(Long productId) {
+//
+//        System.out.println("delete product with id: " + productId);
+//
+//        Product productFromDB = productRepository.findById(productId)
+//                .orElseThrow(() ->
+//                        new ResourceNotFoundException("Product", "productId", productId));
+//
+//        System.out.println("product from db: " + productFromDB);
+//
+//        List<Cart> carts = cartRepository.findCartsByProductId(productId);
+//
+//        System.out.println("carts: " + carts);
+//
+//        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
+//
+//
+//
+//        productRepository.delete(productFromDB);
+//        return modelMapper.map(productFromDB, ProductDTO.class);
+//    }
+
+
+    //debug this function with prints to find the bug:
+//    @Override
+//    @Transactional
+//    public ProductDTO deleteProduct(Long productId) {
+//        System.out.println("Starting deleteProduct for productId: " + productId);
+//
+//        Product productFromDB = productRepository.findById(productId)
+//                .orElseThrow(() -> {
+//                    System.out.println("Product not found for id: " + productId);
+//                    return new ResourceNotFoundException("Product", "productId", productId);
+//                });
+//
+//        System.out.println("Fetched product from DB: " + productFromDB);
+//
+//        List<Cart> carts = cartRepository.findCartsByProductId(productId);
+//        System.out.println("Carts containing product: " + carts);
+//
+//        carts.forEach(cart -> {
+//            System.out.println("Deleting product from cartId: " + cart.getCartId());
+//            cartService.deleteProductFromCart(cart.getCartId(), productId);
+//        });
+//
+//        System.out.println("Deleting product from repository: " + productFromDB);
+//        productRepository.delete(productFromDB);
+//
+//        ProductDTO deletedProductDTO = modelMapper.map(productFromDB, ProductDTO.class);
+//        System.out.println("Returning deleted product DTO: " + deletedProductDTO);
+//
+//        return deletedProductDTO;
+//    }
+
     @Override
+    @Transactional
     public ProductDTO deleteProduct(Long productId) {
+        System.out.println("Starting deleteProduct for productId: " + productId);
+
         Product productFromDB = productRepository.findById(productId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Product", "productId", productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
+        System.out.println("Found product: " + productFromDB.getProductName());
+
+        // Delete from all carts that contain this product
         List<Cart> carts = cartRepository.findCartsByProductId(productId);
-        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
+        System.out.println("Found " + carts.size() + " carts containing this product");
 
+        carts.forEach(cart -> {
+            System.out.println("Deleting product from cartId: " + cart.getCartId());
+            cartService.deleteProductFromCart(cart.getCartId(), productId);
+        });
+
+        // Refresh the product entity to get updated relationships
+        productFromDB = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+        System.out.println("After cart cleanup, product has " + productFromDB.getProducts().size() + " cart items");
+
+        // Now delete the product
         productRepository.delete(productFromDB);
+        System.out.println("Product deleted successfully");
+
         return modelMapper.map(productFromDB, ProductDTO.class);
     }
+
 
     @Override
     public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {

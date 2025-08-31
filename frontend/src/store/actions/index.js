@@ -507,6 +507,8 @@ export const deleteProduct =
     try {
         setLoader(true)
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
+        console.log(endpoint);
+        console.log(productId);
         await api.delete(`${endpoint}${productId}`);
         toast.success("Product deleted successfully");
         setLoader(false);
