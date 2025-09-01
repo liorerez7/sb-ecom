@@ -190,6 +190,7 @@ const onDeleteHandler = () => {
         open={openProductViewModal}
         setOpen={setOpenProductViewModal}
         product={selectedProduct}
+        isAvailable={true}
       />
     </div>
   )

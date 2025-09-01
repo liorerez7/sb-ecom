@@ -17,8 +17,8 @@ import AdminLayout from "./components/admin/AdminLayout";
 import Dashboard from "./components/admin/dashboard/Dashboard";
 import AdminProducts from "./components/admin/products/AdminProducts";
 import Sellers from "./components/admin/sellers/Sellers";
-import Categories from "./components/admin/categories/Categories";
 import Orders from "./components/admin/orders/Orders";
+import Category from "./components/admin/categories/Category";
 
 function App() {
   return (
@@ -49,7 +49,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="sellers" element={<Sellers />} />
-              <Route path="categories" element={<Categories />} />
+              <Route path="categories" element={<Category />} />
               <Route path="orders" element={<Orders />} />
             </Route>
           </Route>
