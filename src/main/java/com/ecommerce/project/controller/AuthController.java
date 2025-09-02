@@ -1,10 +1,12 @@
 package com.ecommerce.project.controller;
 
 
+import com.ecommerce.project.config.AppConstants;
 import com.ecommerce.project.model.AppRole;
 import com.ecommerce.project.model.Role;
 import com.ecommerce.project.model.User;
 import com.ecommerce.project.payload.AuthenticationResult;
+import com.ecommerce.project.payload.UserResponse;
 import com.ecommerce.project.reposetories.RoleRepository;
 import com.ecommerce.project.reposetories.UserRepository;
 import com.ecommerce.project.security.jwt.JwtUtils;
@@ -16,6 +18,9 @@ import com.ecommerce.project.security.services.UserDetailsImpl;
 import com.ecommerce.project.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -53,6 +58,15 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         authService.register(signUpRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!").getMessage());
+    }
+
+    @GetMapping("/sellers")
+    public ResponseEntity<UserResponse> getAllSellers(
+            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber) {
+
+        Sort sortByAndOrder = Sort.by(AppConstants.SORT_USERS_BY).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, Integer.parseInt(AppConstants.PAGE_SIZE), sortByAndOrder);
+        return ResponseEntity.ok(authService.getAllSellers(pageDetails));
     }
 
     @GetMapping("/username")

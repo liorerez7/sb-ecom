@@ -1,6 +1,7 @@
 import { FaEdit, FaEye, FaImage, FaTrashAlt } from "react-icons/fa";
 import { MdOutlineEmail } from "react-icons/md";
 
+
 export const adminProductTableColumn = (
   handleEdit,
   handleDelete,

@@ -6,6 +6,8 @@ import { authReducer } from "./authReducer";
 import { paymentMethodReducer } from "./paymentMethodReducer";
 import { adminReducer } from "./adminReducer";
 import { orderReducer } from "./orderReducer";
+import { sellerReducer } from "./sellerReducer";
+
 
 
 const user = localStorage.getItem('auth')
@@ -36,6 +38,7 @@ export const store = configureStore({
     payment: paymentMethodReducer,
     admin: adminReducer,
     order: orderReducer,
+    seller: sellerReducer,
   }, 
   preloadedState: initialState,
   
