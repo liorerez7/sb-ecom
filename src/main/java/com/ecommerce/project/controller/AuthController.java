@@ -56,8 +56,9 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        System.out.println(signUpRequest);
         authService.register(signUpRequest);
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!").getMessage());
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
     @GetMapping("/sellers")
@@ -92,7 +93,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new MessageResponse("Signed out successfully!").getMessage());
+                .body(new MessageResponse("Signed out successfully!"));
     }
 
 }

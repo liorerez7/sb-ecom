@@ -104,6 +104,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         Set<String> strRoles = signUpRequest.getRoles();
+        System.out.println(strRoles);
         Set<Role> roles = new HashSet<>();
 
         if(strRoles == null){
