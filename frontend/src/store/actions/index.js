@@ -341,9 +341,12 @@ export const createStripePaymentSecret= (sendData) => async (dispatch, getState)
 
 
 export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading, toast) => async (dispatch, getState) => {
+    //debug:
+    console.log(sendData);
     try{
         dispatch({type: 'IS_FETCHING'});
-        const { data } = await api.post("/order/users/payments/Stripe",sendData);   
+        const { data } = await api.post("/order/users/payments/Stripe",sendData);  
+        console.log(data); 
 
         if(data){
             localStorage.removeItem('cartItems');

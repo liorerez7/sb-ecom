@@ -96,14 +96,32 @@ public class OrderServiceImpl implements OrderService{
         }
 
         orderItems= orderItemRepository.saveAll(orderItems);
+//        cart.getCartItems().forEach(cartItem -> {
+//            int quantity = cartItem.getQuantity();
+//            Product product = cartItem.getProduct();
+//            product.setQuantity(product.getQuantity() - quantity);
+//            productRepository.save(product);
+//            cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
+//
+//        });
+
+        // קודם איסוף המידע הדרוש
+        List<Long> productIds = cart.getCartItems().stream()
+                .map(cartItem -> cartItem.getProduct().getProductId())
+                .toList();
+
+// עדכון כמויות המוצרים
         cart.getCartItems().forEach(cartItem -> {
             int quantity = cartItem.getQuantity();
             Product product = cartItem.getProduct();
             product.setQuantity(product.getQuantity() - quantity);
             productRepository.save(product);
-            cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
-
         });
+
+// מחיקת פריטים מהעגלה
+        productIds.forEach(productId ->
+                cartService.deleteProductFromCart(cart.getCartId(), productId)
+        );
 
         // savedOrder.setOrderItems(orderItems);
 

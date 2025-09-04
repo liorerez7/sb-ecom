@@ -30,6 +30,7 @@ public class OrderController {
     public ResponseEntity<OrderDTO> orderProducts(@PathVariable String paymentMethod,
                                                   @RequestBody OrderRequestDTO orderRequestDTO){
 
+        System.out.println("----------------------------------------------" + orderRequestDTO + "----------------------------------------------");
         String emailId = authUtil.loggedInEmail();
         OrderDTO orderDTO = orderService.placeOrder(
                 emailId, orderRequestDTO.getAddressId(),
