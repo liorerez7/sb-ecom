@@ -51,20 +51,110 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private AuthUtil authUtil;
 
+//    @Override
+//    @Transactional
+//    public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgPaymentId,
+//                               String pgStatus, String pgResponseMessage, String pgName) {
+//
+//        // getting user cart
+//        Cart cart = cartRepository.findCartByEmail(emailId);
+//        if (cart == null || cart.getCartItems().isEmpty()) {
+//            throw new ResourceNotFoundException("Cart", "email", emailId);
+//        }
+//
+//        Address address = addressRepository.findById(addressId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+//
+//        Order order = new Order();
+//        order.setEmail(emailId);
+//        order.setOrderDate(LocalDate.now());
+//        order.setTotalAmount(cart.getTotalPrice());
+//        order.setOrderStatus("Accepted");
+//        order.setAddress(address);
+//
+//        Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
+//        payment.setOrder(order);
+//        payment = paymentRepository.save(payment);
+//        order.setPayment(payment);
+//        Order savedOrder = orderRepository.save(order);
+//
+//        // get items from the cart into the order items
+//        List<CartItem> cartItems = cart.getCartItems();
+//        if(cartItems.isEmpty()){
+//            throw new APIException("No items found in cart");
+//        }
+//
+//        List<OrderItem> orderItems = new ArrayList<>();
+//        for (CartItem cartItem : cartItems) {
+//            OrderItem orderItem = new OrderItem();
+//            orderItem.setProduct(cartItem.getProduct());
+//            orderItem.setQuantity(cartItem.getQuantity());
+//            orderItem.setDiscount(cartItem.getDiscount());
+//            orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+//            orderItem.setOrder(savedOrder);
+//            orderItems.add(orderItem);
+//        }
+//
+//        orderItems= orderItemRepository.saveAll(orderItems);
+////        cart.getCartItems().forEach(cartItem -> {
+////            int quantity = cartItem.getQuantity();
+////            Product product = cartItem.getProduct();
+////            product.setQuantity(product.getQuantity() - quantity);
+////            productRepository.save(product);
+////            cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
+////
+////        });
+//
+//        // קודם איסוף המידע הדרוש
+//        List<Long> productIds = cart.getCartItems().stream()
+//                .map(cartItem -> cartItem.getProduct().getProductId())
+//                .toList();
+//
+//// עדכון כמויות המוצרים
+//        cart.getCartItems().forEach(cartItem -> {
+//            int quantity = cartItem.getQuantity();
+//            Product product = cartItem.getProduct();
+//            product.setQuantity(product.getQuantity() - quantity);
+//            productRepository.save(product);
+//        });
+//
+//// מחיקת פריטים מהעגלה
+//        productIds.forEach(productId ->
+//                cartService.deleteProductFromCart(cart.getCartId(), productId)
+//        );
+//
+//        // savedOrder.setOrderItems(orderItems);
+//
+//        OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
+//        orderItems.forEach(orderItem -> {
+//            OrderItemDTO orderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
+//            orderDTO.getOrderItems().add(orderItemDTO);
+//        });
+//
+//        orderDTO.setAddressId(addressId);
+//        return orderDTO;
+//    }
+
     @Override
     @Transactional
     public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgPaymentId,
                                String pgStatus, String pgResponseMessage, String pgName) {
-
-        // getting user cart
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OrderServiceImpl.class);
+        logger.info("Line 60: Getting user cart for emailId={}", emailId);
         Cart cart = cartRepository.findCartByEmail(emailId);
         if (cart == null || cart.getCartItems().isEmpty()) {
+            logger.error("Line 62: Cart not found or empty for emailId={}", emailId);
             throw new ResourceNotFoundException("Cart", "email", emailId);
         }
 
+        logger.info("Line 65: Fetching address for addressId={}", addressId);
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+                .orElseThrow(() -> {
+                    logger.error("Line 66: Address not found for addressId={}", addressId);
+                    return new ResourceNotFoundException("Address", "id", addressId);
+                });
 
+        logger.info("Line 68: Creating new Order object");
         Order order = new Order();
         order.setEmail(emailId);
         order.setOrderDate(LocalDate.now());
@@ -72,20 +162,26 @@ public class OrderServiceImpl implements OrderService{
         order.setOrderStatus("Accepted");
         order.setAddress(address);
 
+        logger.info("Line 75: Creating new Payment object");
         Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
         payment.setOrder(order);
+        logger.info("Line 77: Saving payment");
         payment = paymentRepository.save(payment);
         order.setPayment(payment);
+        logger.info("Line 79: Saving order");
         Order savedOrder = orderRepository.save(order);
 
-        // get items from the cart into the order items
+        logger.info("Line 82: Getting cart items");
         List<CartItem> cartItems = cart.getCartItems();
         if(cartItems.isEmpty()){
+            logger.error("Line 84: No items found in cart for emailId={}", emailId);
             throw new APIException("No items found in cart");
         }
 
+        logger.info("Line 87: Creating order items from cart items");
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
+            logger.debug("Line 89: Processing cartItem with productId={}", cartItem.getProduct().getProductId());
             OrderItem orderItem = new OrderItem();
             orderItem.setProduct(cartItem.getProduct());
             orderItem.setQuantity(cartItem.getQuantity());
@@ -95,43 +191,40 @@ public class OrderServiceImpl implements OrderService{
             orderItems.add(orderItem);
         }
 
-        orderItems= orderItemRepository.saveAll(orderItems);
-//        cart.getCartItems().forEach(cartItem -> {
-//            int quantity = cartItem.getQuantity();
-//            Product product = cartItem.getProduct();
-//            product.setQuantity(product.getQuantity() - quantity);
-//            productRepository.save(product);
-//            cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
-//
-//        });
+        logger.info("Line 98: Saving all order items");
+        orderItems = orderItemRepository.saveAll(orderItems);
 
-        // קודם איסוף המידע הדרוש
+        logger.info("Line 109: Collecting productIds from cart items");
         List<Long> productIds = cart.getCartItems().stream()
                 .map(cartItem -> cartItem.getProduct().getProductId())
                 .toList();
 
-// עדכון כמויות המוצרים
+        logger.info("Line 114: Updating product quantities");
         cart.getCartItems().forEach(cartItem -> {
             int quantity = cartItem.getQuantity();
             Product product = cartItem.getProduct();
+            logger.debug("Line 117: Updating productId={} quantity from {} to {}", product.getProductId(), product.getQuantity(), product.getQuantity() - quantity);
             product.setQuantity(product.getQuantity() - quantity);
             productRepository.save(product);
         });
 
-// מחיקת פריטים מהעגלה
-        productIds.forEach(productId ->
-                cartService.deleteProductFromCart(cart.getCartId(), productId)
-        );
+        logger.info("Line 122: Removing products from cart");
+        productIds.forEach(productId -> {
+            logger.debug("Line 123: Removing productId={} from cartId={}", productId, cart.getCartId());
+            cartService.deleteProductFromCart(cart.getCartId(), productId);
+        });
 
-        // savedOrder.setOrderItems(orderItems);
-
+        logger.info("Line 128: Mapping savedOrder to OrderDTO");
         OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
         orderItems.forEach(orderItem -> {
+            logger.debug("Line 130: Mapping orderItemId={} to OrderItemDTO", orderItem.getOrderItemId());
             OrderItemDTO orderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
             orderDTO.getOrderItems().add(orderItemDTO);
         });
 
+        logger.info("Line 134: Setting addressId={} in OrderDTO", addressId);
         orderDTO.setAddressId(addressId);
+        logger.info("Line 135: Returning OrderDTO for orderId={}", savedOrder.getOrderId());
         return orderDTO;
     }
 
