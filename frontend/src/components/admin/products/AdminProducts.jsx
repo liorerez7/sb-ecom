@@ -5,7 +5,9 @@ import Loader from '../../shared/Loader';
 import { FaBoxOpen } from 'react-icons/fa';
 import { DataGrid } from '@mui/x-data-grid';
 import { adminProductTableColumn } from '../../helper/tableColumn';
-import  useDashboardProductFilter  from '../../../hooks/useProductFilter';
+//import  useDashboardProductFilter  from '../../../hooks/useProductFilter';
+import  useDashboardProductFilter  from '../../../hooks/useDashboardProductFilter';
+
 import Modal from '../../shared/Modal';
 import AddProductForm from './AddProductForm';
 import DeleteModal from '../../shared/DeleteModal';

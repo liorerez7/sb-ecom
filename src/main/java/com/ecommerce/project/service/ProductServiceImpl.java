@@ -320,26 +320,68 @@ public class ProductServiceImpl implements ProductService {
         return productResponse;
     }
 
+//    @Override
+//    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+//        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+//                ? Sort.by(sortBy).ascending()
+//                : Sort.by(sortBy).descending();
+//
+//        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+//
+//        User user = authUtil.getLoggedInUser();
+//        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
+//
+//        List<Product> products = pageProducts.getContent();
+//
+//        List<ProductDTO> productDTOS = products.stream()
+//                .map(product -> {
+//                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+//                    productDTO.setImage(constructImageUrl(product.getImage()));
+//                    return productDTO;
+//                })
+//                .toList();
+//
+//        ProductResponse productResponse = new ProductResponse();
+//        productResponse.setContent(productDTOS);
+//        productResponse.setPageNumber(pageProducts.getNumber());
+//        productResponse.setPageSize(pageProducts.getSize());
+//        productResponse.setTotalElements(pageProducts.getTotalElements());
+//        productResponse.setTotalPages(pageProducts.getTotalPages());
+//        productResponse.setLastPage(pageProducts.isLast());
+//        return productResponse;
+//    }
     @Override
     public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        System.out.println("getAllProductsForSeller called with pageNumber: " + pageNumber + ", pageSize: " + pageSize + ", sortBy: " + sortBy + ", sortOrder: " + sortOrder);
+
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
+        System.out.println("Sort object created: " + sortByAndOrder);
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        System.out.println("Pageable created: " + pageDetails);
 
         User user = authUtil.getLoggedInUser();
+        System.out.println("Logged in user: " + (user != null ? user.getUsername() : "null"));
+
         Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
+        System.out.println("Fetched products page: totalElements=" + pageProducts.getTotalElements() + ", totalPages=" + pageProducts.getTotalPages());
 
         List<Product> products = pageProducts.getContent();
+        System.out.println("Products list size: " + products.size());
 
         List<ProductDTO> productDTOS = products.stream()
                 .map(product -> {
+                    System.out.println("Mapping product: " + product.getProductName() + ", id: " + product.getProductId());
                     ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
                     productDTO.setImage(constructImageUrl(product.getImage()));
+                    System.out.println("Mapped ProductDTO: " + productDTO.getProductName() + ", image: " + productDTO.getImage());
                     return productDTO;
                 })
                 .toList();
+
+        System.out.println("ProductDTO list size: " + productDTOS.size());
 
         ProductResponse productResponse = new ProductResponse();
         productResponse.setContent(productDTOS);
@@ -348,6 +390,9 @@ public class ProductServiceImpl implements ProductService {
         productResponse.setTotalElements(pageProducts.getTotalElements());
         productResponse.setTotalPages(pageProducts.getTotalPages());
         productResponse.setLastPage(pageProducts.isLast());
+
+        System.out.println("ProductResponse created: pageNumber=" + productResponse.getPageNumber() + ", pageSize=" + productResponse.getPageSize() + ", totalElements=" + productResponse.getTotalElements() + ", totalPages=" + productResponse.getTotalPages() + ", lastPage=" + productResponse.isLastPage());
+
         return productResponse;
     }
 

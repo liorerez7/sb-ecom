@@ -432,6 +432,7 @@ export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch
     try {
         dispatch({ type: "IS_FETCHING" });
         const endpoint = isAdmin ? "/admin/products" : "/seller/products";
+        console.log("is Admin:",isAdmin);
         const { data } = await api.get(`${endpoint}?${queryString}`);
         dispatch({
             type: "FETCH_PRODUCTS_SUCCESS",
