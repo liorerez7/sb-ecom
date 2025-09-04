@@ -5,12 +5,14 @@ import com.ecommerce.project.execptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.model.Product;
+import com.ecommerce.project.model.User;
 import com.ecommerce.project.payload.CartDTO;
 import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.payload.ProductResponse;
 import com.ecommerce.project.reposetories.CartRepository;
 import com.ecommerce.project.reposetories.CategoryRepository;
 import com.ecommerce.project.reposetories.ProductRepository;
+import com.ecommerce.project.util.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +56,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private AuthUtil authUtil;
 
 
     @Override
@@ -90,6 +94,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = modelMapper.map(productDTO, Product.class);
             product.setCategory(category);
             product.setImage("default.png");
+            product.setUser(authUtil.getLoggedInUser());
 
             // After discount
             //product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
@@ -240,63 +245,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    //debug this function with prints to find the bug:
-//    @Override
-//    @Transactional
-//    public ProductDTO deleteProduct(Long productId) {
-//
-//        System.out.println("delete product with id: " + productId);
-//
-//        Product productFromDB = productRepository.findById(productId)
-//                .orElseThrow(() ->
-//                        new ResourceNotFoundException("Product", "productId", productId));
-//
-//        System.out.println("product from db: " + productFromDB);
-//
-//        List<Cart> carts = cartRepository.findCartsByProductId(productId);
-//
-//        System.out.println("carts: " + carts);
-//
-//        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
-//
-//
-//
-//        productRepository.delete(productFromDB);
-//        return modelMapper.map(productFromDB, ProductDTO.class);
-//    }
-
-
-    //debug this function with prints to find the bug:
-//    @Override
-//    @Transactional
-//    public ProductDTO deleteProduct(Long productId) {
-//        System.out.println("Starting deleteProduct for productId: " + productId);
-//
-//        Product productFromDB = productRepository.findById(productId)
-//                .orElseThrow(() -> {
-//                    System.out.println("Product not found for id: " + productId);
-//                    return new ResourceNotFoundException("Product", "productId", productId);
-//                });
-//
-//        System.out.println("Fetched product from DB: " + productFromDB);
-//
-//        List<Cart> carts = cartRepository.findCartsByProductId(productId);
-//        System.out.println("Carts containing product: " + carts);
-//
-//        carts.forEach(cart -> {
-//            System.out.println("Deleting product from cartId: " + cart.getCartId());
-//            cartService.deleteProductFromCart(cart.getCartId(), productId);
-//        });
-//
-//        System.out.println("Deleting product from repository: " + productFromDB);
-//        productRepository.delete(productFromDB);
-//
-//        ProductDTO deletedProductDTO = modelMapper.map(productFromDB, ProductDTO.class);
-//        System.out.println("Returning deleted product DTO: " + deletedProductDTO);
-//
-//        return deletedProductDTO;
-//    }
-
     @Override
     @Transactional
     public ProductDTO deleteProduct(Long productId) {
@@ -351,6 +299,37 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
         Page<Product> pageProducts = productRepository.findAll(pageDetails);
+
+        List<Product> products = pageProducts.getContent();
+
+        List<ProductDTO> productDTOS = products.stream()
+                .map(product -> {
+                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+                    productDTO.setImage(constructImageUrl(product.getImage()));
+                    return productDTO;
+                })
+                .toList();
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOS);
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+        return productResponse;
+    }
+
+    @Override
+    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        User user = authUtil.getLoggedInUser();
+        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
 
         List<Product> products = pageProducts.getContent();
 

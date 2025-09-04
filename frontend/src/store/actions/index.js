@@ -384,7 +384,7 @@ export const analyticsAction = () => async (dispatch, getState) => {
         }
 };
 
-export const getOrdersForDashboard = (queryString, isAdmin = true) => async (dispatch) => {
+export const getOrdersForDashboard = (queryString, isAdmin) => async (dispatch) => {
     try {
         dispatch({ type: "IS_FETCHING" });
         const endpoint = isAdmin ? "/admin/orders" : "/seller/orders";
@@ -409,7 +409,7 @@ export const getOrdersForDashboard = (queryString, isAdmin = true) => async (dis
 };
 
 export const updateOrderStatusFromDashboard =
-     (orderId, orderStatus, toast, setLoader, isAdmin = true) => async (dispatch, getState) => {
+     (orderId, orderStatus, toast, setLoader, isAdmin) => async (dispatch, getState) => {
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/orders/" : "/seller/orders/";
@@ -425,7 +425,7 @@ export const updateOrderStatusFromDashboard =
 };
 
 
-export const dashboardProductsAction = (queryString, isAdmin = true) => async (dispatch) => {
+export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch) => {
     try {
         dispatch({ type: "IS_FETCHING" });
         const endpoint = isAdmin ? "/admin/products" : "/seller/products";
@@ -450,7 +450,7 @@ export const dashboardProductsAction = (queryString, isAdmin = true) => async (d
 };
 
 export const updateProductFromDashboard = 
-    (sendData, toast, reset, setLoader, setOpen, isAdmin = true) => async (dispatch) => {
+    (sendData, toast, reset, setLoader, setOpen, isAdmin) => async (dispatch) => {
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
@@ -473,7 +473,7 @@ export const updateProductFromDashboard =
 };
 
 export const addNewProductFromDashboard = 
-    (sendData, toast, reset, setLoader, setOpen, isAdmin = true) => async(dispatch, getState) => {
+    (sendData, toast, reset, setLoader, setOpen, isAdmin) => async(dispatch, getState) => {
         try {
             setLoader(true);
             const endpoint = isAdmin ? "/admin/categories/" : "/seller/categories/";
@@ -503,7 +503,7 @@ export const addNewProductFromDashboard =
 
 
 export const deleteProduct = 
-    (setLoader, productId, toast, setOpenDeleteModal, isAdmin = true) => async (dispatch, getState) => {
+    (setLoader, productId, toast, setOpenDeleteModal, isAdmin) => async (dispatch, getState) => {
     try {
         setLoader(true)
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
@@ -525,7 +525,7 @@ export const deleteProduct =
 
 
 export const updateProductImageFromDashboard = 
-    (formData, productId, toast, setLoader, setOpen, isAdmin = true) => async (dispatch) => {
+    (formData, productId, toast, setLoader, setOpen, isAdmin) => async (dispatch) => {
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";

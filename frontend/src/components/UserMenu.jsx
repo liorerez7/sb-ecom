@@ -5,7 +5,7 @@ import Avatar from "@mui/material/Avatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { BiUser } from "react-icons/bi";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaUserShield } from "react-icons/fa";
 import { IoExitOutline } from "react-icons/io5";
 import BackDrop from "./BackDrop";
 import { useDispatch } from "react-redux";
@@ -31,6 +31,8 @@ const UserMenu = () => {
   };
 
   const user = useSelector((state) => state.auth.user);
+  const isAdmin = user && user?.roles.includes("ROLE_ADMIN");
+  const isSeller = user && user?.roles.includes("ROLE_SELLER");
 
   return (
     <div>
@@ -69,6 +71,20 @@ const UserMenu = () => {
             <span>Orders</span>
           </MenuItem>
         </Link>
+        {isAdmin && (
+        <Link to="/admin">
+          <MenuItem onClick={handleClose}>
+            <FaUserShield className="text-xl mr-2" />
+            <span>Admin Panel</span>
+          </MenuItem>
+        </Link>)}
+        {isSeller && !isAdmin && (
+        <Link to="/admin/orders">
+          <MenuItem onClick={handleClose}>
+            <FaUserShield className="text-xl mr-2" />
+            <span>Seller Panel</span>
+          </MenuItem>
+        </Link>)}
         <MenuItem onClick={logoutHandler}>
           <IoExitOutline className="text-xl mr-2" />
           <span>Logout</span>

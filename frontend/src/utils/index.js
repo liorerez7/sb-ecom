@@ -2,6 +2,7 @@ import { FaBoxOpen, FaHome, FaShoppingCart, FaStore, FaThList } from "react-icon
 import bannerImageOne from "../assets/sliders/1.jpg";
 import bannerImageTwo from "../assets/sliders/2.jpg";
 import bannerImageThree from "../assets/sliders/3.jpg";
+import { current } from "@reduxjs/toolkit";
 
 export const bannerLists = [
   { id: 1, image: bannerImageOne, title: "Home Comfort", subtitle: "Living Room", description: "Upgrade your space with cozy and stylish sofas" },
@@ -33,4 +34,17 @@ export const adminNavigation = [
       icon: FaShoppingCart
   }
 
+]
+
+export const sellerNavigation = [
+  {
+    name: "Products",
+     href: "/admin/products",
+      icon: FaBoxOpen,
+      current: true
+  },{
+    name: "Orders",
+     href: "/admin/orders",
+      icon: FaShoppingCart
+  }
 ]
