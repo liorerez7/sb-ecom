@@ -37,7 +37,7 @@ const UserMenu = () => {
   return (
     <div>
       <div
-        className="sm:border flex flex-row items-center gap-1 rounded-full cursor-pointer hover:shadow-md p-2 transition text-slate-700"
+        className="flex flex-row items-center gap-1 cursor-pointer p-2 transition text-white hover:bg-white/10 rounded-lg"
         onClick={handleClick}
       >
         <Avatar
@@ -65,7 +65,7 @@ const UserMenu = () => {
             <span>{user?.username || "Profile"}</span>
           </MenuItem>
         </Link>
-        <Link to="/profile/orders">
+        <Link to={isAdmin || isSeller ? "/admin/orders" : "/profile/orders"}>
           <MenuItem onClick={handleClose}>
             <FaShoppingCart className="text-xl mr-2" />
             <span>Orders</span>

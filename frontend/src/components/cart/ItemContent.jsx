@@ -23,6 +23,7 @@ const ItemContent = ({
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const dispatch = useDispatch();
+  image = "5db0e8f4-8cec-4b3e-aa3e-bd78d2133d35";
 
   const handleQtyIncrease = (cartItems) => {
     dispatch(

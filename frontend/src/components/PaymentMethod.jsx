@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 import { addPaymentMethod } from '../store/actions';
 import { createUserCart } from '../store/actions';
 
-
 function PaymentMethod({ value, onChange }) {
     // Get the selected payment method from Redux state
     const { paymentMethod } = useSelector((state) => state.payment);
@@ -28,7 +27,10 @@ function PaymentMethod({ value, onChange }) {
     }, [dispatch, cartId]);
 
     return (
-        <FormControl component="fieldset">
+        
+        <FormControl component="fieldset" sx={{ mt: 4 }}>
+            <br />
+
             <FormLabel component="legend">Select Payment Method</FormLabel>
             <RadioGroup
                 value={value ?? paymentMethod ?? ''}
@@ -36,10 +38,18 @@ function PaymentMethod({ value, onChange }) {
                     dispatch(addPaymentMethod(e.target.value));
                     onChange?.(e);
                 }}
-                >
+            >
                 <FormControlLabel value="Stripe" control={<Radio />} label="Stripe" />
-                <FormControlLabel value="PayPal" control={<Radio />} label="PayPal" />
-
+                <FormControlLabel
+                    value="PayPal"
+                    control={<Radio disabled />}
+                    label={
+                        <span>
+                            PayPal <span style={{ color: '#888', fontStyle: 'italic' }}>(stay tuned)</span>
+                        </span>
+                    }
+                    disabled
+                />
             </RadioGroup>
         </FormControl>
     );
