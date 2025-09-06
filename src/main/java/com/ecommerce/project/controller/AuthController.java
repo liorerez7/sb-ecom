@@ -1,99 +1,177 @@
+//package com.ecommerce.project.controller;
+//
+//
+//import com.ecommerce.project.config.AppConstants;
+//import com.ecommerce.project.model.AppRole;
+//import com.ecommerce.project.model.Role;
+//import com.ecommerce.project.model.User;
+//import com.ecommerce.project.payload.AuthenticationResult;
+//import com.ecommerce.project.payload.UserResponse;
+//import com.ecommerce.project.reposetories.RoleRepository;
+//import com.ecommerce.project.reposetories.UserRepository;
+//import com.ecommerce.project.security.jwt.JwtUtils;
+//import com.ecommerce.project.security.request.SignupRequest;
+//import com.ecommerce.project.security.request.LoginRequest;
+//import com.ecommerce.project.security.response.MessageResponse;
+//import com.ecommerce.project.security.response.UserInfoResponse;
+//import com.ecommerce.project.security.services.UserDetailsImpl;
+//import com.ecommerce.project.service.AuthService;
+//import jakarta.validation.Valid;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.data.domain.PageRequest;
+//import org.springframework.data.domain.Pageable;
+//import org.springframework.data.domain.Sort;
+//import org.springframework.http.HttpHeaders;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.ResponseCookie;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+//import org.springframework.security.core.Authentication;
+//import org.springframework.security.core.AuthenticationException;
+//import org.springframework.security.core.GrantedAuthority;
+//import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.web.bind.annotation.*;
+//
+//import java.util.*;
+//
+//@RestController
+//@RequestMapping("/api/auth")
+//public class AuthController {
+//
+//    @Autowired
+//    AuthService authService;
+//
+//    @PostMapping("/signin")
+//    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+//
+//        AuthenticationResult result = authService.login(loginRequest);
+//
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.SET_COOKIE, result.getJwtCookie().toString())
+//                .body(result.getResponse());
+//    }
+//
+//    @PostMapping("/signup")
+//    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+//        System.out.println(signUpRequest);
+//        authService.register(signUpRequest);
+//        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+//    }
+//
+//    @GetMapping("/sellers")
+//    public ResponseEntity<UserResponse> getAllSellers(
+//            @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber) {
+//
+//        Sort sortByAndOrder = Sort.by(AppConstants.SORT_USERS_BY).descending();
+//        Pageable pageDetails = PageRequest.of(pageNumber, Integer.parseInt(AppConstants.PAGE_SIZE), sortByAndOrder);
+//        return ResponseEntity.ok(authService.getAllSellers(pageDetails));
+//    }
+//
+//    @GetMapping("/username")
+//    public String currentUserName(Authentication authentication) {
+//        if (authentication != null) {
+//            return authentication.getName();
+//        } else {
+//            return "NULL";
+//        }
+//    }
+//
+//    @GetMapping("/user")
+//    public ResponseEntity<?> getUserDetails(Authentication authentication) {
+//
+//        return ResponseEntity.ok().body(authService.getCurrentUserDetails(authentication));
+//
+//    }
+//
+//    @PostMapping("/signout")
+//    public ResponseEntity<?> signoutUser() {
+//
+//        ResponseCookie cookie = authService.logoutUser();
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+//                .body(new MessageResponse("Signed out successfully!"));
+//    }
+//
+//}
+
 package com.ecommerce.project.controller;
 
-
 import com.ecommerce.project.config.AppConstants;
-import com.ecommerce.project.model.AppRole;
-import com.ecommerce.project.model.Role;
-import com.ecommerce.project.model.User;
 import com.ecommerce.project.payload.AuthenticationResult;
 import com.ecommerce.project.payload.UserResponse;
-import com.ecommerce.project.reposetories.RoleRepository;
-import com.ecommerce.project.reposetories.UserRepository;
-import com.ecommerce.project.security.jwt.JwtUtils;
 import com.ecommerce.project.security.request.SignupRequest;
 import com.ecommerce.project.security.request.LoginRequest;
 import com.ecommerce.project.security.response.MessageResponse;
-import com.ecommerce.project.security.response.UserInfoResponse;
-import com.ecommerce.project.security.services.UserDetailsImpl;
 import com.ecommerce.project.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "User authentication & session")
 public class AuthController {
 
     @Autowired
     AuthService authService;
 
+    @Operation(summary = "Sign in")
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-
         AuthenticationResult result = authService.login(loginRequest);
-
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, result.getJwtCookie().toString())
                 .body(result.getResponse());
     }
 
+    @Operation(summary = "Sign up")
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        System.out.println(signUpRequest);
         authService.register(signUpRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @Operation(summary = "List sellers") // מיועד לתצוגה בדמו; שייך ל-auth API אצלך
     @GetMapping("/sellers")
     public ResponseEntity<UserResponse> getAllSellers(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber) {
-
         Sort sortByAndOrder = Sort.by(AppConstants.SORT_USERS_BY).descending();
         Pageable pageDetails = PageRequest.of(pageNumber, Integer.parseInt(AppConstants.PAGE_SIZE), sortByAndOrder);
         return ResponseEntity.ok(authService.getAllSellers(pageDetails));
     }
 
+    @Hidden // לא הכרחי להצגה ב-Swagger; עוזר לשמור על ניקיון
     @GetMapping("/username")
     public String currentUserName(Authentication authentication) {
-        if (authentication != null) {
-            return authentication.getName();
-        } else {
-            return "NULL";
-        }
+        return (authentication != null) ? authentication.getName() : "NULL";
     }
 
+    @Operation(summary = "Current user details")
     @GetMapping("/user")
     public ResponseEntity<?> getUserDetails(Authentication authentication) {
-
         return ResponseEntity.ok().body(authService.getCurrentUserDetails(authentication));
-
     }
 
+    @Operation(summary = "Sign out")
     @PostMapping("/signout")
     public ResponseEntity<?> signoutUser() {
-
         ResponseCookie cookie = authService.logoutUser();
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new MessageResponse("Signed out successfully!"));
     }
-
 }
