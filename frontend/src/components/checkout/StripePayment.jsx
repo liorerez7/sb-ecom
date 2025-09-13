@@ -54,7 +54,14 @@ function StripePayment() {
   return (
     <>
       {clientSecret && (
-        <Elements stripe={stripePromise}  options={{clientSecret}}>
+        <Elements
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: { theme: 'stripe' },
+            loader: 'never'
+          }}
+        >
           <PaymentForm clientSecret={clientSecret} totalPrice={totalPrice} />
         </Elements>
       )}

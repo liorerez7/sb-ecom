@@ -74,11 +74,8 @@ public class StripeServiceImpl implements StripeService{
                         .setCurrency(stripePaymentDTO.getCurrency())
                         .setCustomer(customer.getId())
                         .setDescription(stripePaymentDTO.getDescription())
-                        .setAutomaticPaymentMethods(
-                                PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
-                                        .setEnabled(true)
-                                        .build()
-                        );
+                        .addPaymentMethodType("card");
+
 
         if (stripePaymentDTO.getMetadata() != null) {
             for (Map.Entry<String, String> e : stripePaymentDTO.getMetadata().entrySet()) {
@@ -94,24 +91,9 @@ public class StripeServiceImpl implements StripeService{
                 : null;
 
         RequestOptions options = RequestOptions.builder()
-                .setIdempotencyKey(idemKey)  // ← זה החשוב
+                .setIdempotencyKey(idemKey)
                 .build();
 
         return PaymentIntent.create(params, options);
-
-//        PaymentIntentCreateParams params =
-//                PaymentIntentCreateParams.builder()
-//                        .setAmount(stripePaymentDTO.getAmount())
-//                        .setCurrency(stripePaymentDTO.getCurrency())
-//                        .setCustomer(customer.getId())
-//                        .setDescription(stripePaymentDTO.getDescription())
-//                        .setAutomaticPaymentMethods(
-//                                PaymentIntentCreateParams.AutomaticPaymentMethods.builder()
-//                                        .setEnabled(true)
-//                                        .build()
-//                        )
-//                        .build();
-//
-//        return PaymentIntent.create(params);
     }
 }
