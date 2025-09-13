@@ -311,3 +311,6 @@
 [13/Sep/2025:15:50:15 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 3870 ms
 [13/Sep/2025:15:50:18 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?pageNumber=0&sortBy=price&sortOrder=asc HTTP/1.1" 200 1303 44682 ms
 [13/Sep/2025:15:50:18 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 7516 ms
+[13/Sep/2025:16:03:16 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/categories HTTP/1.1" 200 141 1999367 ms
+[13/Sep/2025:16:03:16 +0300] 0:0:0:0:0:0:0:1 "GET /api/public/products?pageNumber=0&sortBy=price&sortOrder=asc HTTP/1.1" 200 1303 2008433 ms
+[13/Sep/2025:16:03:18 +0300] 0:0:0:0:0:0:0:1 "GET /images/default.png HTTP/1.1" 401 121 254921 ms
