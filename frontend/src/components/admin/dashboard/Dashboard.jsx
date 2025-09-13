@@ -1,19 +1,18 @@
-import React /*, { useEffect }*/ from 'react'
+import React from 'react'
 import DashboardOverview from './DashboardOverview'
 import { FaBoxOpen, FaDollarSign, FaShoppingCart } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-// import { analyticsAction } from '../../../store/actions';
 import Loader from '../../shared/Loader';
 import ErrorPage from '../../shared/ErrorPage';
 import { analyticsAction } from '../../../store/actions';
 import { useEffect } from 'react';
+import { FaChartLine } from 'react-icons/fa';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { isLoading, errorMessage } = useSelector((state) => state.errors);
-
-  const admin = useSelector((state) => state.admin) || {};
-
+  const { user } = useSelector(state => state.auth);
+  const isAdmin = user && user?.roles?.includes("ROLE_ADMIN");
 
   const {
     analytics: {
@@ -25,19 +24,34 @@ const Dashboard = () => {
 
   useEffect(() => {
     dispatch(analyticsAction());
-   }, [dispatch]);
-
+  }, [dispatch]);
 
   if (isLoading) return <Loader />;
   if (errorMessage) return <ErrorPage message={errorMessage} />;
 
   return (
-    <div>
-      <div
-        className='flex md:flex-row mt-8 flex-col lg:justify-between 
-          border border-slate-400 rounded-lg bg-gradient-to-r
-          from-blue-50 to-blue-100 shadow-lg'
-      >
+    <div className='space-y-8'>
+      {/* Welcome Section */}
+      <div className='bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h1 className='text-3xl font-bold text-slate-900 mb-2'>
+              Welcome back, {user?.username || 'Admin'}!
+            </h1>
+            <p className='text-slate-600'>
+              Here's what's happening with your {isAdmin ? 'platform' : 'store'} today.
+            </p>
+          </div>
+          <div className='hidden md:flex items-center space-x-4'>
+            <div className='w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center'>
+              <FaChartLine className='text-white text-2xl' />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Analytics Cards */}
+      <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'>
         <DashboardOverview
           title="Total Products"
           amount={productCount}
