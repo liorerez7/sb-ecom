@@ -553,7 +553,9 @@ export const updateOrderStatusFromDashboard =
         const endpoint = isAdmin ? "/admin/orders/" : "/seller/orders/";
         const { data } = await api.put(`${endpoint}${orderId}/status`, { status: orderStatus});
         toast.success(data.message || "Order updated successfully");
-        await dispatch(getOrdersForDashboard());
+        //await dispatch(getOrdersForDashboard());
+        const queryString = window.location.search.slice(1);
+        await dispatch(getOrdersForDashboard(queryString, isAdmin));
     } catch (error) {
         console.log(error);
         toast.error(error?.response?.data?.message || "Internal Server Error");

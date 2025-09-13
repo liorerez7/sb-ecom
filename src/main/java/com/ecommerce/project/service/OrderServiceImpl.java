@@ -51,90 +51,6 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private AuthUtil authUtil;
 
-//    @Override
-//    @Transactional
-//    public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgPaymentId,
-//                               String pgStatus, String pgResponseMessage, String pgName) {
-//
-//        // getting user cart
-//        Cart cart = cartRepository.findCartByEmail(emailId);
-//        if (cart == null || cart.getCartItems().isEmpty()) {
-//            throw new ResourceNotFoundException("Cart", "email", emailId);
-//        }
-//
-//        Address address = addressRepository.findById(addressId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
-//
-//        Order order = new Order();
-//        order.setEmail(emailId);
-//        order.setOrderDate(LocalDate.now());
-//        order.setTotalAmount(cart.getTotalPrice());
-//        order.setOrderStatus("Accepted");
-//        order.setAddress(address);
-//
-//        Payment payment = new Payment(paymentMethod, pgPaymentId, pgStatus, pgResponseMessage, pgName);
-//        payment.setOrder(order);
-//        payment = paymentRepository.save(payment);
-//        order.setPayment(payment);
-//        Order savedOrder = orderRepository.save(order);
-//
-//        // get items from the cart into the order items
-//        List<CartItem> cartItems = cart.getCartItems();
-//        if(cartItems.isEmpty()){
-//            throw new APIException("No items found in cart");
-//        }
-//
-//        List<OrderItem> orderItems = new ArrayList<>();
-//        for (CartItem cartItem : cartItems) {
-//            OrderItem orderItem = new OrderItem();
-//            orderItem.setProduct(cartItem.getProduct());
-//            orderItem.setQuantity(cartItem.getQuantity());
-//            orderItem.setDiscount(cartItem.getDiscount());
-//            orderItem.setOrderedProductPrice(cartItem.getProductPrice());
-//            orderItem.setOrder(savedOrder);
-//            orderItems.add(orderItem);
-//        }
-//
-//        orderItems= orderItemRepository.saveAll(orderItems);
-////        cart.getCartItems().forEach(cartItem -> {
-////            int quantity = cartItem.getQuantity();
-////            Product product = cartItem.getProduct();
-////            product.setQuantity(product.getQuantity() - quantity);
-////            productRepository.save(product);
-////            cartService.deleteProductFromCart(cart.getCartId(), product.getProductId());
-////
-////        });
-//
-//        // קודם איסוף המידע הדרוש
-//        List<Long> productIds = cart.getCartItems().stream()
-//                .map(cartItem -> cartItem.getProduct().getProductId())
-//                .toList();
-//
-//// עדכון כמויות המוצרים
-//        cart.getCartItems().forEach(cartItem -> {
-//            int quantity = cartItem.getQuantity();
-//            Product product = cartItem.getProduct();
-//            product.setQuantity(product.getQuantity() - quantity);
-//            productRepository.save(product);
-//        });
-//
-//// מחיקת פריטים מהעגלה
-//        productIds.forEach(productId ->
-//                cartService.deleteProductFromCart(cart.getCartId(), productId)
-//        );
-//
-//        // savedOrder.setOrderItems(orderItems);
-//
-//        OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
-//        orderItems.forEach(orderItem -> {
-//            OrderItemDTO orderItemDTO = modelMapper.map(orderItem, OrderItemDTO.class);
-//            orderDTO.getOrderItems().add(orderItemDTO);
-//        });
-//
-//        orderDTO.setAddressId(addressId);
-//        return orderDTO;
-//    }
-
     @Override
     @Transactional
     public OrderDTO placeOrder(String emailId, Long addressId, String paymentMethod, String pgPaymentId,
@@ -267,30 +183,19 @@ public class OrderServiceImpl implements OrderService{
 
         User seller = authUtil.getLoggedInUser();
 
-        Page<Order> pageOrders = orderRepository.findAll(pageDetails);
+        Page<Order> pageOrders = orderRepository.findAllBySellerId(seller.getId(), pageDetails);
 
-        List<Order> sellerOrders = pageOrders.getContent().stream()
-                .filter(order -> order.getOrderItems().stream()
-                        .anyMatch(orderItem -> {
-                            var product = orderItem.getProduct();
-                            if (product == null || product.getUser() == null) {
-                                return false;
-                            }
-                            return product.getUser().getId().equals(
-                                    seller.getId());
-                        }))
-                .toList();
-
-        List<OrderDTO> orderDTOs = sellerOrders.stream()
+        List<OrderDTO> orderDTOs = pageOrders.getContent().stream()
                 .map(order -> modelMapper.map(order, OrderDTO.class))
                 .toList();
-        OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setContent(orderDTOs);
-        orderResponse.setPageNumber(pageOrders.getNumber());
-        orderResponse.setPageSize(pageOrders.getSize());
-        orderResponse.setTotalElements(pageOrders.getTotalElements());
-        orderResponse.setTotalPages(pageOrders.getTotalPages());
-        orderResponse.setLastPage(pageOrders.isLast());
-        return orderResponse;
+
+        OrderResponse res = new OrderResponse();
+        res.setContent(orderDTOs);
+        res.setPageNumber(pageOrders.getNumber());
+        res.setPageSize(pageOrders.getSize());
+        res.setTotalElements(pageOrders.getTotalElements()); // עכשיו נכון, רק של המוכר
+        res.setTotalPages(pageOrders.getTotalPages());
+        res.setLastPage(pageOrders.isLast());
+        return res;
     }
 }
