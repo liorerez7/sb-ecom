@@ -1,19 +1,24 @@
+/* Remove the restrictive container styles */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* Removed max-width to allow full width */
+  /* Removed padding to let components control their own spacing */
+  /* Removed text-align center as it shouldn't be global */
+  min-height: 100vh;
+  width: 100%;
 }
 
+/* Logo animations - keeping these as they don't affect layout */
 .logo {
   height: 6em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -33,6 +38,7 @@
   }
 }
 
+/* Card styling - if needed */
 .card {
   padding: 2em;
 }

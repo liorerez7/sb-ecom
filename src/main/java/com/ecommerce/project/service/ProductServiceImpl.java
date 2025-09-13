@@ -5,12 +5,14 @@ import com.ecommerce.project.execptions.ResourceNotFoundException;
 import com.ecommerce.project.model.Cart;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.model.Product;
+import com.ecommerce.project.model.User;
 import com.ecommerce.project.payload.CartDTO;
 import com.ecommerce.project.payload.ProductDTO;
 import com.ecommerce.project.payload.ProductResponse;
 import com.ecommerce.project.reposetories.CartRepository;
 import com.ecommerce.project.reposetories.CategoryRepository;
 import com.ecommerce.project.reposetories.ProductRepository;
+import com.ecommerce.project.util.AuthUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
@@ -52,7 +55,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CartService cartService;
-    private ProductService productService;
+
+    @Autowired
+    private AuthUtil authUtil;
+
 
     @Override
     public ProductResponse searchProductByKeyword(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -88,9 +94,16 @@ public class ProductServiceImpl implements ProductService {
             Product product = modelMapper.map(productDTO, Product.class);
             product.setCategory(category);
             product.setImage("default.png");
+            product.setUser(authUtil.getLoggedInUser());
 
             // After discount
-            product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
+            //product.setSpecialPrice(product.getPrice() - (product.getDiscount() / 100) * product.getPrice());
+            Double specialPrice = productDTO.getSpecialPrice();
+            if (specialPrice == null) {
+                specialPrice = product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice();
+            }
+            product.setSpecialPrice(specialPrice);
+
 
             Product savedProduct = productRepository.save(product);
 
@@ -168,15 +181,46 @@ public class ProductServiceImpl implements ProductService {
         Product productFromDB = productRepository.findById(productId).orElseThrow(() ->
                 new ResourceNotFoundException("Product", "productId", productId));
 
+//        Product product = modelMapper.map(productDTO, Product.class);
+//        productFromDB.setPrice(product.getPrice());
+//        productFromDB.setProductName(product.getProductName());
+//        productFromDB.setDescription(product.getDescription());
+//        productFromDB.setQuantity(product.getQuantity());
+//        productFromDB.setDiscount(product.getDiscount());
+//        productFromDB.setSpecialPrice(product.getPrice() - (product.getDiscount()/100) * product.getPrice());
+//        productFromDB.setImage(product.getImage());
+//        productFromDB.setCategory(product.getCategory());
         Product product = modelMapper.map(productDTO, Product.class);
         productFromDB.setPrice(product.getPrice());
         productFromDB.setProductName(product.getProductName());
         productFromDB.setDescription(product.getDescription());
         productFromDB.setQuantity(product.getQuantity());
         productFromDB.setDiscount(product.getDiscount());
-        productFromDB.setSpecialPrice(product.getPrice() - (product.getDiscount()/100) * product.getPrice());
+
+//        productFromDB.setSpecialPrice(
+//                product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice()
+//        );
+
+        Double specialPrice = product.getSpecialPrice();
+        if (specialPrice == null) {
+            specialPrice = product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice();
+        }
+        productFromDB.setSpecialPrice(specialPrice);
+
+
         productFromDB.setImage(product.getImage());
-        productFromDB.setCategory(product.getCategory());
+// קטגוריה תעודכן רק אם נשלחה ב־DTO
+        if (product.getCategory() != null) {
+            productFromDB.setCategory(product.getCategory());
+
+        }
+
+        if (product.getImage() != null) {
+            productFromDB.setImage(product.getImage());
+        }
+
+
+
 
         Product savedProduct = productRepository.save(productFromDB);
 
@@ -200,18 +244,39 @@ public class ProductServiceImpl implements ProductService {
         return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
+
     @Override
+    @Transactional
     public ProductDTO deleteProduct(Long productId) {
+        System.out.println("Starting deleteProduct for productId: " + productId);
+
         Product productFromDB = productRepository.findById(productId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Product", "productId", productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
+        System.out.println("Found product: " + productFromDB.getProductName());
+
+        // Delete from all carts that contain this product
         List<Cart> carts = cartRepository.findCartsByProductId(productId);
-        carts.forEach(cart -> cartService.deleteProductFromCart(cart.getCartId(), productId));
+        System.out.println("Found " + carts.size() + " carts containing this product");
 
+        carts.forEach(cart -> {
+            System.out.println("Deleting product from cartId: " + cart.getCartId());
+            cartService.deleteProductFromCart(cart.getCartId(), productId);
+        });
+
+        // Refresh the product entity to get updated relationships
+        productFromDB = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
+
+        System.out.println("After cart cleanup, product has " + productFromDB.getProducts().size() + " cart items");
+
+        // Now delete the product
         productRepository.delete(productFromDB);
+        System.out.println("Product deleted successfully");
+
         return modelMapper.map(productFromDB, ProductDTO.class);
     }
+
 
     @Override
     public ProductDTO updateProductImage(Long productId, MultipartFile image) throws IOException {
@@ -224,6 +289,111 @@ public class ProductServiceImpl implements ProductService {
         productFromDB.setImage(fileName);
         Product savedProduct = productRepository.save(productFromDB);
         return modelMapper.map(savedProduct, ProductDTO.class);
+    }
+
+    @Override
+    public ProductResponse getAllProductsForAdmin(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        Page<Product> pageProducts = productRepository.findAll(pageDetails);
+
+        List<Product> products = pageProducts.getContent();
+
+        List<ProductDTO> productDTOS = products.stream()
+                .map(product -> {
+                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+                    productDTO.setImage(constructImageUrl(product.getImage()));
+                    return productDTO;
+                })
+                .toList();
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOS);
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+        return productResponse;
+    }
+
+//    @Override
+//    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+//        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+//                ? Sort.by(sortBy).ascending()
+//                : Sort.by(sortBy).descending();
+//
+//        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+//
+//        User user = authUtil.getLoggedInUser();
+//        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
+//
+//        List<Product> products = pageProducts.getContent();
+//
+//        List<ProductDTO> productDTOS = products.stream()
+//                .map(product -> {
+//                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+//                    productDTO.setImage(constructImageUrl(product.getImage()));
+//                    return productDTO;
+//                })
+//                .toList();
+//
+//        ProductResponse productResponse = new ProductResponse();
+//        productResponse.setContent(productDTOS);
+//        productResponse.setPageNumber(pageProducts.getNumber());
+//        productResponse.setPageSize(pageProducts.getSize());
+//        productResponse.setTotalElements(pageProducts.getTotalElements());
+//        productResponse.setTotalPages(pageProducts.getTotalPages());
+//        productResponse.setLastPage(pageProducts.isLast());
+//        return productResponse;
+//    }
+    @Override
+    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        System.out.println("getAllProductsForSeller called with pageNumber: " + pageNumber + ", pageSize: " + pageSize + ", sortBy: " + sortBy + ", sortOrder: " + sortOrder);
+
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        System.out.println("Sort object created: " + sortByAndOrder);
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+        System.out.println("Pageable created: " + pageDetails);
+
+        User user = authUtil.getLoggedInUser();
+        System.out.println("Logged in user: " + (user != null ? user.getUsername() : "null"));
+
+        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
+        System.out.println("Fetched products page: totalElements=" + pageProducts.getTotalElements() + ", totalPages=" + pageProducts.getTotalPages());
+
+        List<Product> products = pageProducts.getContent();
+        System.out.println("Products list size: " + products.size());
+
+        List<ProductDTO> productDTOS = products.stream()
+                .map(product -> {
+                    System.out.println("Mapping product: " + product.getProductName() + ", id: " + product.getProductId());
+                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+                    productDTO.setImage(constructImageUrl(product.getImage()));
+                    System.out.println("Mapped ProductDTO: " + productDTO.getProductName() + ", image: " + productDTO.getImage());
+                    return productDTO;
+                })
+                .toList();
+
+        System.out.println("ProductDTO list size: " + productDTOS.size());
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOS);
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+
+        System.out.println("ProductResponse created: pageNumber=" + productResponse.getPageNumber() + ", pageSize=" + productResponse.getPageSize() + ", totalElements=" + productResponse.getTotalElements() + ", totalPages=" + productResponse.getTotalPages() + ", lastPage=" + productResponse.isLastPage());
+
+        return productResponse;
     }
 
     private ProductResponse getProductResponse(Page<Product> pageProducts) {

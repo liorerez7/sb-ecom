@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { MdShoppingCart, MdArrowBack, MdSecurity } from "react-icons/md";
-import { HiShieldCheck, HiTruck, HiRefresh } from "react-icons/hi";
+import { HiShieldCheck, HiTruck, HiRefresh, HiExclamationCircle } from "react-icons/hi";
 import ItemContent from "./ItemContent";
 import CartEmpty from "./CartEmpty.jsx";
 
@@ -17,13 +17,30 @@ const Cart = () => {
       return sum + unit * qty;
     }, 0) ?? 0;
 
-  const shippingThreshold = 200;
+  const shippingThreshold = 50;
   const remainingForFreeShipping = Math.max(0, shippingThreshold - totalPrice);
   const qualifiesForFreeShipping = totalPrice >= shippingThreshold;
+
+  const [promoInput, setPromoInput] = useState("");
+  const [promoFeedback, setPromoFeedback] = useState({ visible: false, text: "", type: "error" }); // type kept for future styling variations
 
   if (!cart || cart.length === 0) {
     return <CartEmpty />;
   }
+
+  const handlePromoCode = () => {
+ 
+    setPromoFeedback({
+      visible: true,
+      text: "Wrong code. Please check and try again.",
+      type: "error",
+    });
+
+    window.clearTimeout(handlePromoCode._timer);
+    handlePromoCode._timer = window.setTimeout(() => {
+      setPromoFeedback((prev) => ({ ...prev, visible: false }));
+    }, 2500);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -59,7 +76,7 @@ const Cart = () => {
                 <HiTruck className="text-blue-600" />
               </div>
               <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
                   style={{ width: `${Math.min((totalPrice / shippingThreshold) * 100, 100)}%` }}
                 />
@@ -122,15 +139,13 @@ const Cart = () => {
                         ${totalPrice.toFixed(2)}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-slate-600">Shipping</span>
-                      <span className={`text-sm ${qualifiesForFreeShipping ? 'text-emerald-600 font-semibold' : 'text-slate-500'}`}>
-                        {qualifiesForFreeShipping ? 'FREE' : 'Calculated at checkout'}
+                      <span className={`text-sm ${qualifiesForFreeShipping ? "text-emerald-600 font-semibold" : "text-slate-500"}`}>
+                        {qualifiesForFreeShipping ? "FREE" : "Calculated at checkout"}
                       </span>
                     </div>
-                    
-                    
                   </div>
 
                   {/* Divider */}
@@ -179,19 +194,38 @@ const Cart = () => {
                   <div className="h-2 w-2 rounded-full bg-amber-500"></div>
                   <h3 className="font-semibold text-amber-900">Have a promo code?</h3>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex gap-2 flex-col sm:flex-row">
                   <input
                     type="text"
                     placeholder="Enter code"
-                    className="flex-1 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                    value={promoInput}
+                    onChange={(e) => setPromoInput(e.target.value)}
+                    aria-label="Promo code"
+                    aria-invalid={promoFeedback.visible ? "true" : "false"}
+                    className={`flex-1 rounded-lg border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2
+                      ${promoFeedback.visible ? "border-red-300 focus:ring-red-400/30" : "border-amber-200 focus:border-amber-400 focus:ring-amber-400/20"}`}
                   />
                   <button
+                    onClick={handlePromoCode}
                     type="button"
                     className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
                   >
                     Apply
                   </button>
                 </div>
+
+                {/* Inline feedback (no alerts) */}
+                {promoFeedback.visible && (
+                  <div
+                    className="mt-3 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 transition-opacity"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <HiExclamationCircle className="text-red-500" />
+                    <span>{promoFeedback.text}</span>
+                  </div>
+                )}
               </div>
 
               {/* Additional Info */}

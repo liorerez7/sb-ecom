@@ -31,14 +31,22 @@ const PaymentForm = ({clientSecret, totalPrice}) => {
 
             if (error) {
                 setErrorMessage(error.message);
-                return false;
+                setProcessing(false);
+                return;
             }
         }
     };
 
     const paymentElementOptions = {
         layout: "tabs",
-    }
+        paymentMethodOrder: ['card'],
+        wallets: {
+        applePay: 'never',
+        googlePay: 'never',
+        link: 'never'
+    },
+    fields: { billingDetails: 'never' }
+};
 
     const isLoading = !clientSecret || !stripe || !elements;
 

@@ -13,6 +13,12 @@ import PrivateRoute from "./components/PrivateRoute";
 import Register from "./components/auth/Register";
 import Checkout from "./components/checkout/Checkout";
 import PaymentConfirmation from "./components/checkout/PaymentConfirmation";
+import AdminLayout from "./components/admin/AdminLayout";
+import Dashboard from "./components/admin/dashboard/Dashboard";
+import AdminProducts from "./components/admin/products/AdminProducts";
+import Sellers from "./components/admin/sellers/Sellers";
+import Orders from "./components/admin/orders/Orders";
+import Category from "./components/admin/categories/Category";
 
 function App() {
   return (
@@ -23,7 +29,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
 
           <Route path="/" element={<PrivateRoute />}>
@@ -36,8 +41,19 @@ function App() {
           <Route path="/" element={<PrivateRoute publicPage />}>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-
           </Route>
+
+          <Route element={<PrivateRoute adminOnly />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="sellers" element={<Sellers />} />
+              <Route path="categories" element={<Category />} />
+              <Route path="orders" element={<Orders />} />
+            </Route>
+          </Route>
+
+
         </Routes>
       </Router>
       <Toaster position="top-center" />

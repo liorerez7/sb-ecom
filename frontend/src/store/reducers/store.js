@@ -4,6 +4,10 @@ import { errorReducer } from "./errorReducer";
 import { cartReducer } from "./cartReducer";
 import { authReducer } from "./authReducer";
 import { paymentMethodReducer } from "./paymentMethodReducer";
+import { adminReducer } from "./adminReducer";
+import { orderReducer } from "./orderReducer";
+import { sellerReducer } from "./sellerReducer";
+
 
 
 const user = localStorage.getItem('auth')
@@ -22,6 +26,7 @@ const clientSecretLS = localStorage.getItem('client-secret')
 const initialState = {
   auth: {user : user, selectedUserCheckoutAddress, clientSecret: clientSecretLS},
   carts : {cart : cartItems},
+
 };
 
 export const store = configureStore({
@@ -31,6 +36,9 @@ export const store = configureStore({
     carts: cartReducer,
     auth: authReducer,
     payment: paymentMethodReducer,
+    admin: adminReducer,
+    order: orderReducer,
+    seller: sellerReducer,
   }, 
   preloadedState: initialState,
   
