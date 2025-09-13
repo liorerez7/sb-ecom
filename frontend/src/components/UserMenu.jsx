@@ -59,18 +59,15 @@ const UserMenu = () => {
           },
         }}
       >
-        <Link to="/profile">
-          <MenuItem onClick={handleClose}>
-            <BiUser className="text-xl mr-2" />
-            <span>{user?.username || "Profile"}</span>
-          </MenuItem>
-        </Link>
-        <Link to={isAdmin || isSeller ? "/admin/orders" : "/profile/orders"}>
-          <MenuItem onClick={handleClose}>
-            <FaShoppingCart className="text-xl mr-2" />
-            <span>Orders</span>
-          </MenuItem>
-        </Link>
+        
+        {(isAdmin || isSeller) && (
+          <Link to="/admin/orders">
+            <MenuItem onClick={handleClose}>
+              <FaShoppingCart className="text-xl mr-2" />
+              <span>Orders</span>
+            </MenuItem>
+          </Link>
+        )}
         {isAdmin && (
         <Link to="/admin">
           <MenuItem onClick={handleClose}>

@@ -185,8 +185,11 @@ public class OrderServiceImpl implements OrderService{
 
         Page<Order> pageOrders = orderRepository.findAllBySellerId(seller.getId(), pageDetails);
 
+//        List<OrderDTO> orderDTOs = pageOrders.getContent().stream()
+//                .map(order -> modelMapper.map(order, OrderDTO.class))
+//                .toList();
         List<OrderDTO> orderDTOs = pageOrders.getContent().stream()
-                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .map(order -> mapOrderForSeller(order, seller.getId()))
                 .toList();
 
         OrderResponse res = new OrderResponse();
@@ -198,4 +201,36 @@ public class OrderServiceImpl implements OrderService{
         res.setLastPage(pageOrders.isLast());
         return res;
     }
+
+    // מחזיר OrderDTO שבו:
+//  - totalAmount = סכום חלקי של פריטי המוכר בלבד (subtotal)
+//  - orderItems = רק הפריטים של המוכר (כדי שב-Modal/Details הוא לא יראה פריטים של אחרים)
+    private OrderDTO mapOrderForSeller(Order order, Long sellerId) {
+        // מיפוי בסיסי להזמנה
+        OrderDTO dto = modelMapper.map(order, OrderDTO.class);
+
+        // סינון פריטים של המוכר בלבד והמרה ל-DTO
+        List<OrderItemDTO> sellerItems = order.getOrderItems().stream()
+                .filter(oi -> oi.getProduct() != null
+                        && oi.getProduct().getUser() != null   // אם אצלך השדה הוא getSeller() — החלף פה ובסכום למטה
+                        && oi.getProduct().getUser().getId().equals(sellerId))
+                .map(oi -> modelMapper.map(oi, OrderItemDTO.class))
+                .toList();
+
+        // קובע את רשימת הפריטים ב-DTO לרק פריטי המוכר
+        dto.setOrderItems(new ArrayList<>(sellerItems));
+
+        // חישוב subtotal למוכר: price * quantity (בהנחה שהמחיר הוא אחרי הנחת פריט)
+        double sellerSubtotal = order.getOrderItems().stream()
+                .filter(oi -> oi.getProduct() != null
+                        && oi.getProduct().getUser() != null   // אם זה getSeller() – עדכן גם כאן
+                        && oi.getProduct().getUser().getId().equals(sellerId))
+                .mapToDouble(oi -> oi.getOrderedProductPrice() * oi.getQuantity())
+                .sum();
+
+        dto.setTotalAmount(sellerSubtotal);
+
+        return dto;
+    }
+
 }
