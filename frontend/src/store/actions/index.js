@@ -428,12 +428,16 @@ export const updateOrderStatusFromDashboard =
 };
 
 
+// i want to debug this function to see everything i get:
 export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch) => {
     try {
         dispatch({ type: "IS_FETCHING" });
         const endpoint = isAdmin ? "/admin/products" : "/seller/products";
-        console.log("is Admin:",isAdmin);
+        console.log("is Admin:", isAdmin);
         const { data } = await api.get(`${endpoint}?${queryString}`);
+        // Debug: log the entire response data
+        console.log("Dashboard Products API response:", data);
+
         dispatch({
             type: "FETCH_PRODUCTS_SUCCESS",
             payload: data.content,
@@ -445,11 +449,11 @@ export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch
         });
         dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
-        console.log(error);
+        console.log("Dashboard Products API error:", error);
         dispatch({ 
             type: "IS_ERROR",
             payload: error?.response?.data?.message || "Failed to fetch dashboard products",
-         });
+        });
     }
 };
 
@@ -458,6 +462,12 @@ export const updateProductFromDashboard =
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
+
+        //debug the product:
+        console.log("productId" + sendData.productId + " , " + JSON.stringify(sendData));
+
+
+
         await api.put(`${endpoint}${sendData.productId}`, sendData);
         toast.success("Product update successful");
         reset();
@@ -469,7 +479,7 @@ export const updateProductFromDashboard =
      
     // }
 
-    await dispatch(dashboardProductsAction("", isAdmin));
+    await dispatch(dashboardProductsAction());
     } catch (error) {
     toast.error(error?.response?.data?.message || "Product update failed");
     }
@@ -495,7 +505,7 @@ export const addNewProductFromDashboard =
         //     setLoader(false);
         // }
 
-        await dispatch(dashboardProductsAction("", isAdmin)); // העברת queryString ריק
+        await dispatch(dashboardProductsAction());
         } catch (error) {
             console.error(error);
             toast.error(error?.response?.data?.message || "Product creation failed");
@@ -518,7 +528,7 @@ export const deleteProduct =
         setLoader(false);
         setOpenDeleteModal(false);
         //await dispatch(dashboardProductsAction());
-        await dispatch(dashboardProductsAction("", isAdmin));
+        await dispatch(dashboardProductsAction());
     } catch (error) {
         console.log(error);
         toast.error(
@@ -538,7 +548,7 @@ export const updateProductImageFromDashboard =
         setLoader(false);
         setOpen(false);
         //await dispatch(dashboardProductsAction());
-        await dispatch(dashboardProductsAction("", isAdmin));
+        await dispatch(dashboardProductsAction());
     } catch (error) {
         toast.error(error?.response?.data?.description || "Product Image upload failed");
      
