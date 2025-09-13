@@ -299,76 +299,211 @@ export const getUserCart = () => async (dispatch, getState) => {
 }
 
 
-export const createStripePaymentSecret= (sendData) => async (dispatch, getState) => {
-    try{
-        dispatch({type: 'IS_FETCHING'});
+// export const createStripePaymentSecret= (sendData) => async (dispatch, getState) => {
+//     try{
+//         dispatch({type: 'IS_FETCHING'});
 
 
-        let idem = localStorage.getItem('stripe_idem');
-        if (!idem) {
-            idem = (crypto?.randomUUID && crypto.randomUUID()) || String(Date.now());
-            localStorage.setItem('stripe_idem', idem);
-        }
+//         let idem = localStorage.getItem('stripe_idem');
+//         if (!idem) {
+//             idem = (crypto?.randomUUID && crypto.randomUUID()) || String(Date.now());
+//             localStorage.setItem('stripe_idem', idem);
+//         }
 
-        sendData = {
-            ...sendData,
-            metadata: { ...(sendData.metadata || {}), idempotencyKey: idem },
-        };
-
-
-        const {data} = await api.post("/order/stripe-client-secret", sendData, {
-            headers: {'Stripe-Idempotency-Key': idem}
-        });
+//         sendData = {
+//             ...sendData,
+//             metadata: { ...(sendData.metadata || {}), idempotencyKey: idem },
+//         };
 
 
-        dispatch({
-            type: 'CLIENT_SECRET', 
-            payload: data,
-        });
+//         const {data} = await api.post("/order/stripe-client-secret", sendData, {
+//             headers: {'Stripe-Idempotency-Key': idem}
+//         });
 
-        dispatch({type: 'IS_SUCCESS'});
 
+//         dispatch({
+//             type: 'CLIENT_SECRET', 
+//             payload: data,
+//         });
+
+//         dispatch({type: 'IS_SUCCESS'});
+
+//         localStorage.setItem("client-secret", JSON.stringify(data));
+
+//     } catch (error) {
+//         console.error("❌ POST /order/stripe-client-secret failed:");
+//         console.error("⛔ Error message:", error?.message);
+//         console.error("📨 error.response:", error?.response);
+//         console.error("📄 error.response.data:", error?.response?.data);
+//         console.error("🔁 Full Axios error:", error);
+//     }
+// }
+// export const createStripePaymentSecret = (sendData) => async (dispatch, getState) => {
+//     try {
+//         dispatch({type: 'IS_FETCHING'});
+
+//         // יצירת Idempotency Key
+//         let idem = localStorage.getItem('stripe_idem');
+//         if (!idem) {
+//             idem = (crypto?.randomUUID && crypto.randomUUID()) || String(Date.now());
+//             localStorage.setItem('stripe_idem', idem);
+//         }
+
+//         // הוספת metadata עם idempotency key
+//         sendData = {
+//             ...sendData,
+//             metadata: { 
+//                 ...(sendData.metadata || {}), 
+//                 idempotencyKey: idem 
+//             },
+//         };
+
+//         console.log("🔍 Sending payment data:", sendData);
+
+//         const {data} = await api.post("/order/stripe-client-secret", sendData, {
+//             headers: {'Stripe-Idempotency-Key': idem}
+//         });
+
+//         console.log("✅ Payment secret created:", data);
+
+//         dispatch({
+//             type: 'CLIENT_SECRET', 
+//             payload: data,
+//         });
+
+//         dispatch({type: 'IS_SUCCESS'});
+
+//         localStorage.setItem("client-secret", JSON.stringify(data));
+
+//     } catch (error) {
+//         console.error("❌ POST /order/stripe-client-secret failed:");
+//         console.error("⛔ Error message:", error?.message);
+//         console.error("📨 error.response:", error?.response);
+//         console.error("📄 error.response.data:", error?.response?.data);
+//         console.error("🔁 Full Axios error:", error);
+        
+//         // 🔴 חשוב: עדכון State עם השגיאה
+//         dispatch({
+//             type: 'SET_ERROR',
+//             payload: error?.response?.data?.message || error?.message || 'Failed to create payment'
+//         });
+        
+//         dispatch({type: 'IS_ERROR'});
+//     }
+// };
+
+
+// export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading, toast) => async (dispatch, getState) => {
+//     //debug:
+//     console.log(sendData);
+//     try{
+//         dispatch({type: 'IS_FETCHING'});
+//         const { data } = await api.post("/order/users/payments/Stripe",sendData);  
+//         console.log(data); 
+
+//         if(data){
+//             localStorage.removeItem('cartItems');
+//             localStorage.removeItem('client-secret');
+//             localStorage.removeItem('CHECKOUT_ADDRESS');
+            
+//             dispatch({type: 'REMOVE_CLIENT_SECRET_ADDRESS'});
+//             dispatch({type: 'CLEAR_CART'});
+//             toast.success("Payment Successful");
+//         }
+//         else{
+//             setErrorMessage("Payment Failed");
+//         }
+//     } catch (error) {
+//         console.error("❌ POST /order/users/payments/Stripe failed:");
+//         console.error("⛔ Error message:", error?.message);
+//         console.error("📨 error.response:", error?.response);
+//         console.error("📄 error.response.data:", error?.response?.data);
+//         console.error("🔁 Full Axios error:", error);
+//     }
+// }
+
+import toast from 'react-hot-toast';
+
+export const createStripePaymentSecret = (sendData) => async (dispatch, getState) => {
+    try {
+        dispatch({ type: "IS_FETCHING" });
+        
+        console.log("🔍 Sending payment data:", sendData);
+        
+        const { data } = await api.post("/order/stripe-client-secret", sendData);
+        
+        console.log("✅ Payment secret created:", data);
+        
+        dispatch({ type: "CLIENT_SECRET", payload: data });
         localStorage.setItem("client-secret", JSON.stringify(data));
-
+        dispatch({ type: "IS_SUCCESS" });
+        
+        return data;
+        
     } catch (error) {
-        console.error("❌ POST /order/stripe-client-secret failed:");
-        console.error("⛔ Error message:", error?.message);
-        console.error("📨 error.response:", error?.response);
-        console.error("📄 error.response.data:", error?.response?.data);
-        console.error("🔁 Full Axios error:", error);
+        console.error("❌ Failed to create client secret:", error);
+        toast.error(error?.response?.data?.message || "Failed to create client secret");
+        
+        dispatch({
+            type: 'SET_ERROR',
+            payload: error?.response?.data?.message || error?.message || 'Failed to create payment'
+        });
+        
+        dispatch({ type: 'IS_ERROR' });
+        throw error;
     }
-}
-
+};
 
 export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading, toast) => async (dispatch, getState) => {
-    //debug:
-    console.log(sendData);
-    try{
-        dispatch({type: 'IS_FETCHING'});
-        const { data } = await api.post("/order/users/payments/Stripe",sendData);  
-        console.log(data); 
-
-        if(data){
-            localStorage.removeItem('cartItems');
-            localStorage.removeItem('client-secret');
-            localStorage.removeItem('CHECKOUT_ADDRESS');
+    console.log("📦 Creating order with data:", sendData);
+    
+    try {
+        dispatch({ type: 'IS_FETCHING' });
+        
+        // Create order via API - note the endpoint change to match the working example
+        const response = await api.post("/order/users/payments/Stripe", sendData);
+        
+        console.log("✅ Order created successfully:", response.data);
+        
+        if (response.data) {
+            // Clear storage
+            localStorage.removeItem("CHECKOUT_ADDRESS");
+            localStorage.removeItem("cartItems");
+            localStorage.removeItem("client-secret");
             
-            dispatch({type: 'REMOVE_CLIENT_SECRET_ADDRESS'});
-            dispatch({type: 'CLEAR_CART'});
-            toast.success("Payment Successful");
+            // Update Redux state
+            dispatch({ type: "REMOVE_CLIENT_SECRET_ADDRESS" });
+            dispatch({ type: "CLEAR_CART" });
+            dispatch({ type: 'IS_SUCCESS' });
+            
+            toast.success("Order Accepted");
+            
+            return response.data;
+        } else {
+            setErrorMessage("Payment Failed. Please try again.");
+            return null;
         }
-        else{
-            setErrorMessage("Payment Failed");
-        }
+        
     } catch (error) {
-        console.error("❌ POST /order/users/payments/Stripe failed:");
-        console.error("⛔ Error message:", error?.message);
-        console.error("📨 error.response:", error?.response);
-        console.error("📄 error.response.data:", error?.response?.data);
-        console.error("🔁 Full Axios error:", error);
+        console.error("❌ Failed to create order:", error);
+        
+        const errorMsg = error?.response?.data?.message || 
+                        error?.message || 
+                        'Payment Failed. Please try again.';
+        
+        setErrorMessage(errorMsg);
+        toast.error(errorMsg);
+        
+        dispatch({
+            type: 'SET_ERROR',
+            payload: errorMsg
+        });
+        
+        dispatch({ type: 'IS_ERROR' });
+        
+        return null;
     }
-}
-
+};
 
 export const analyticsAction = () => async (dispatch, getState) => {
         try {

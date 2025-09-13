@@ -2,39 +2,58 @@ import React, { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 import { sellerTableColumns } from "../../helper/tableColumn";
+import { Paper, Box } from "@mui/material";
 
 const SellerTable = ({ sellers, pagination }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const pathname = useLocation().pathname;
   const params = new URLSearchParams(searchParams);
-  const [currentPage, setCurrentPage] = useState(pagination?.pageNumber || 1);
 
-  const tableRecords = sellers?.map((item) => {
-    return {
-      id: item.userId,
-      username: item.username,
-      email: item.email,
-    };
-  });
+  // התאמה לתבנית ההטמעה שלך (pageNumber הוא 0-based מהשרת)
+  const [currentPage, setCurrentPage] = useState(
+    (pagination?.pageNumber ?? 0) + 1
+  );
+
+  const tableRecords = sellers?.map((item) => ({
+    id: item.userId,
+    username: item.username,
+    email: item.email,
+  }));
 
   const handlePaginationChange = (paginationModel) => {
-    const page = paginationModel.page + 1;
+    const page = paginationModel.page + 1; // 1-based ל־UI
     setCurrentPage(page);
-
     params.set("page", page.toString());
     navigate(`${pathname}?${params}`);
   };
 
   return (
-    <div>
-      <div className="max-w-fit mx-auto">
+    <Paper className="overflow-hidden shadow-sm">
+      <Box
+        sx={{
+          width: "100%",
+          "& .MuiDataGrid-root": { border: "none" },
+          "& .MuiDataGrid-cell": { borderBottom: "1px solid #f3f4f6" },
+          "& .MuiDataGrid-columnHeaders": { borderBottom: "2px solid #e5e7eb" },
+          "& .MuiDataGrid-virtualScroller": { backgroundColor: "#ffffff" },
+          "& .MuiDataGrid-footerContainer": {
+            borderTop: "2px solid #e5e7eb",
+            backgroundColor: "#f9fafb",
+          },
+          "& .MuiDataGrid-row:hover": { backgroundColor: "transparent", cursor: "default" },
+          "& .MuiDataGrid-cell:focus": { outline: "none" },
+          "& .MuiDataGrid-columnHeader:focus": { outline: "none" },
+          "& .MuiDataGrid-columnSeparator": { display: "none" },
+          "& .MuiDataGrid-menuIcon": { display: "none" },
+          "& .MuiDataGrid-sortIcon": { display: "none" },
+        }}
+      >
         <DataGrid
-          className="w-full"
           rows={tableRecords}
+          columns={sellerTableColumns}
           paginationMode="server"
           rowCount={pagination?.totalElements || 0}
-          columns={sellerTableColumns}
           initialState={{
             pagination: {
               paginationModel: {
@@ -46,16 +65,14 @@ const SellerTable = ({ sellers, pagination }) => {
           onPaginationModelChange={handlePaginationChange}
           disableRowSelectionOnClick
           disableColumnResize
-          pagination
+          disableColumnMenu
           pageSizeOptions={[pagination?.pageSize || 10]}
-          paginationOptions={{
-            showFirstButton: true,
-            showLastButton: true,
-            hideNextButton: currentPage === pagination?.totalPages,
-          }}
+          pagination
+          autoHeight
+          getRowClassName={() => "hover:bg-transparent"}
         />
-      </div>
-    </div>
+      </Box>
+    </Paper>
   );
 };
 
