@@ -23,7 +23,19 @@ const ItemContent = ({
 }) => {
   const [currentQuantity, setCurrentQuantity] = useState(quantity);
   const dispatch = useDispatch();
-  image = "5db0e8f4-8cec-4b3e-aa3e-bd78d2133d35";
+  //image = "5db0e8f4-8cec-4b3e-aa3e-bd78d2133d35";
+
+  const getImageUrl = (imageName) => {
+    if (!imageName) return '/placeholder-image.jpg'; 
+    
+    // אם זה URL מלא, השתמש בו
+    if (imageName.startsWith('http')) {
+      return imageName;
+    }
+    
+    // אחרת, בנה URL עם הבסיס שלך
+    return `${import.meta.env.VITE_BACK_END_URL}/images/${imageName}`;
+  };
 
   const handleQtyIncrease = (cartItems) => {
     dispatch(
@@ -58,9 +70,12 @@ const ItemContent = ({
             <div className="flex-shrink-0">
               <div className="h-24 w-24 overflow-hidden rounded-xl border-2 border-slate-100 bg-white shadow-sm">
                 <img
-                  src={`${import.meta.env.VITE_BACK_END_URL}/images/${image}`}
+                  src={getImageUrl(image)}
                   alt={productName}
                   className="h-full w-full object-cover transition-transform hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = '/placeholder-image.jpg'; // fallback
+                  }}
                 />
               </div>
             </div>

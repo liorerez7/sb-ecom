@@ -680,17 +680,27 @@ export const updateProductImageFromDashboard =
     try {
         setLoader(true);
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
-        await api.put(`${endpoint}${productId}/image`, formData);
+        const response = await api.put(`${endpoint}${productId}/image`, formData); // ✅ שמור את response
+        
+        // עדכן את התמונה בעגלה אם המוצר קיים שם
+        if (response.data && response.data.image) {
+            dispatch(updateCartItemImage(productId, response.data.image));
+        }
+        
         toast.success("Image upload successful");
         setLoader(false);
         setOpen(false);
-        //await dispatch(dashboardProductsAction());
         await dispatch(dashboardProductsAction());
     } catch (error) {
         toast.error(error?.response?.data?.description || "Product Image upload failed");
-     
+        setLoader(false); // ✅ הוסף גם כאן
     }
 };
+
+export const updateCartItemImage = (productId, newImage) => ({
+    type: 'UPDATE_CART_ITEM_IMAGE',
+    payload: { productId, newImage }
+});
 
 export const getAllCategoriesDashboard = (queryString) => async (dispatch) => {
   dispatch({ type: "CATEGORY_LOADER" });

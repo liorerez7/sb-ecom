@@ -46,6 +46,17 @@ export const cartReducer = (state = initialState, action) => {
         case 'CLEAR_CART':
             return {...state, cart: [], totalPrice: 0, cartId: null};
 
+        case 'UPDATE_CART_ITEM_IMAGE':
+            console.log('Updating cart item image:', action.payload);
+            return {
+                ...state,
+                cart: state.cart.map(item => 
+                    item.productId === action.payload.productId 
+                        ? { ...item, image: action.payload.newImage }
+                        : item
+                )
+            };
+
         default:
             return state
 
