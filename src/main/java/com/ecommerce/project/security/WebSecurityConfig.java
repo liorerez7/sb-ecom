@@ -1,8 +1,8 @@
 package com.ecommerce.project.security;
 
-import com.ecommerce.project.model.AppRole;
-import com.ecommerce.project.model.Role;
-import com.ecommerce.project.model.User;
+import com.ecommerce.project.model.*;
+import com.ecommerce.project.reposetories.CategoryRepository;
+import com.ecommerce.project.reposetories.ProductRepository;
 import com.ecommerce.project.reposetories.RoleRepository;
 import com.ecommerce.project.reposetories.UserRepository;
 import com.ecommerce.project.security.jwt.AuthEntryPointJwt;
@@ -27,7 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
+import com.ecommerce.project.security.BooksSeedHelper;
 import java.util.Set;
 
 @Configuration
@@ -160,67 +160,60 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public CommandLineRunner initData(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public CommandLineRunner initData(RoleRepository roleRepository,
+                                      UserRepository userRepository,
+                                      CategoryRepository categoryRepository,
+                                      ProductRepository productRepository,
+                                      PasswordEncoder passwordEncoder,
+                                      BooksSeedHelper booksSeedHelper) {
         return args -> {
-            // Retrieve or create roles
+            // 1) יצירת תפקידים אם חסרים
             Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                    .orElseGet(() -> {
-                        Role newUserRole = new Role(AppRole.ROLE_USER);
-                        return roleRepository.save(newUserRole);
-                    });
+                    .orElseGet(() -> roleRepository.save(new Role(AppRole.ROLE_USER)));
 
             Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
-                    .orElseGet(() -> {
-                        Role newSellerRole = new Role(AppRole.ROLE_SELLER);
-                        return roleRepository.save(newSellerRole);
-                    });
+                    .orElseGet(() -> roleRepository.save(new Role(AppRole.ROLE_SELLER)));
 
             Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-                    .orElseGet(() -> {
-                        Role newAdminRole = new Role(AppRole.ROLE_ADMIN);
-                        return roleRepository.save(newAdminRole);
-                    });
+                    .orElseGet(() -> roleRepository.save(new Role(AppRole.ROLE_ADMIN)));
 
-            Set<Role> userRoles = Set.of(userRole);
+            Set<Role> userRoles   = Set.of(userRole);
             Set<Role> sellerRoles = Set.of(sellerRole);
-            Set<Role> adminRoles = Set.of(userRole, sellerRole, adminRole);
+            Set<Role> adminRoles  = Set.of(userRole, sellerRole, adminRole);
 
-
-            // Create users if not already present
+            // 2) יצירת משתמשים בסיסיים אם חסרים
             if (!userRepository.existsByUsername("user1")) {
                 User user1 = new User("user1", "user1@example.com", passwordEncoder.encode("password1"));
                 userRepository.save(user1);
             }
-
             if (!userRepository.existsByUsername("seller1")) {
                 User seller1 = new User("seller1", "seller1@example.com", passwordEncoder.encode("password2"));
                 userRepository.save(seller1);
             }
-
             if (!userRepository.existsByUsername("admin")) {
                 User admin = new User("admin", "admin@example.com", passwordEncoder.encode("adminPass"));
                 userRepository.save(admin);
             }
 
-            // Update roles for existing users
-
+            // 3) שיוך תפקידים
             if (userRepository.existsByUsername("user1")) {
                 User user = userRepository.findByUsername("user1").orElseThrow();
                 user.setRoles(userRoles);
                 userRepository.save(user);
             }
-
             if (userRepository.existsByUsername("seller1")) {
                 User user = userRepository.findByUsername("seller1").orElseThrow();
                 user.setRoles(sellerRoles);
                 userRepository.save(user);
             }
-
             if (userRepository.existsByUsername("admin")) {
                 User user = userRepository.findByUsername("admin").orElseThrow();
                 user.setRoles(adminRoles);
                 userRepository.save(user);
             }
+
+            // 4) זריעת ספרים (10 פריטים) דרך המחלקה החדשה
+            booksSeedHelper.seedBooks();
         };
     }
 }
