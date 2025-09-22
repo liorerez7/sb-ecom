@@ -6,7 +6,7 @@ import { FaFolderOpen, FaThList, FaBoxOpen } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 import Modal from "../../shared/Modal";
-import AddCategoryForm from "./AddCategoryForm";
+import AddCategoryForm from "./AddCategoryForm.jsx";
 import Loader from "../../shared/Loader";
 import { DeleteModal } from "../../shared/DeleteModal";
 import useCategoryFilter from "../../../hooks/useCategoryFilter";
