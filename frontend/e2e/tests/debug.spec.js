@@ -1,6 +1,9 @@
 // e2e/tests/debug.spec.js
 import { test, expect } from '@playwright/test';
 
+if (process.env.CI) test.skip(true, 'Skip debug test in CI (uses localhost)');
+
+
 test.describe('Debug Configuration', () => {
   test('check baseURL and navigation', async ({ page, baseURL, context }) => {
     console.log('=== Configuration Debug ===');
