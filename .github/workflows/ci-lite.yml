@@ -22,8 +22,13 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Install Playwright (browsers)
-        uses: microsoft/playwright-github-action@v1
+      - name: Install Playwright (npm package is already in devDependencies)
+        working-directory: frontend
+        run: npx playwright --version
+
+      - name: Install browsers + OS deps (Ubuntu)
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests against PROD
         working-directory: frontend
