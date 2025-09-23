@@ -37,10 +37,24 @@ jobs:
           E2E_BASE_URL: "http://54.221.32.104"
         run: npx playwright test -c e2e/playwright.config.js --workers=1
 
+      # דיבוג: הדפסה של מבנה התיקיות כדי לוודא איפה נוצר הדו"ח
+      - name: List report folders (debug)
+        if: always()
+        run: |
+          echo "PWD=$(pwd)"
+          ls -la
+          echo "---- FRONTEND TREE ----"
+          ls -la frontend || true
+          echo "---- E2E TREE ----"
+          ls -la frontend/e2e || true
+
+      # העלאה משני נתיבים אפשריים
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: frontend/playwright-report
-          if-no-files-found: ignore
+          path: |
+            frontend/playwright-report
+            frontend/e2e/playwright-report
+          if-no-files-found: warn
