@@ -30,12 +30,21 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
+#      - name: Run Playwright tests against PROD
+#        working-directory: frontend
+#        env:
+#          CI: "true"
+#          E2E_BASE_URL: "http://54.221.32.104"
+#        run: npx playwright test -c e2e/playwright.config.js --workers=1
+
       - name: Run Playwright tests against PROD
         working-directory: frontend
         env:
-          CI: "true"
-          E2E_BASE_URL: "http://54.221.32.104"
-        run: npx playwright test -c e2e/playwright.config.js --workers=1
+            CI: "true"
+            E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+        run: |
+            echo "E2E_BASE_URL=$E2E_BASE_URL"
+            npx playwright test -c e2e/playwright.config.js --workers=1
 
       # דיבוג: הדפסה של מבנה התיקיות כדי לוודא איפה נוצר הדו"ח
       - name: List report folders (debug)
