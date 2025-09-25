@@ -1,18 +1,4 @@
-// import placeHolderForImage from "../assets/sliders/1.jpg";
-
-// const About = () => {
-//     return (
-//         <div>
-//             About
-//             <div>
-                
-//             </div>
-//         </div>
-//     )
-// }
-
-// export default About;
-import { 
+import {
   Container, 
   Typography, 
   Box, 

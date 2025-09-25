@@ -1,0 +1,46 @@
+name: CD - Deploy to EC2
+
+on:
+  # כפתור ידני
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to deploy (default: deployment-backup-v4)'
+        required: false
+  # אופציונלי: פריסה אוטומטית על כל push ל-branch הספציפי
+  push:
+    branches: ["deployment-backup-v4"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Write SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add EC2 to known_hosts
+        run: ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy (run deploy.sh on EC2)
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          APP_DIR: ${{ secrets.EC2_APP_DIR }}
+          # אם לא מילאת ref, נשתמש ב-deployment-backup-v4
+          GIT_REF: ${{ github.event.inputs.ref || 'deployment-backup-v4' }}
+        run: |
+          echo "Deploying ref: $GIT_REF to $USER@$HOST"
+          ssh -i ~/.ssh/id_rsa "$USER@$HOST" "sudo ${APP_DIR:-/opt/app}/deploy.sh '$GIT_REF'"
+
+      - name: Show running containers
+        if: always()
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          APP_DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          ssh -i ~/.ssh/id_rsa "$USER@$HOST" "docker compose -f ${APP_DIR:-/opt/app}/docker-compose.yml ps || true"
