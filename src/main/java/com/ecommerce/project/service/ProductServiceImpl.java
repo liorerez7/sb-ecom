@@ -181,15 +181,6 @@ public class ProductServiceImpl implements ProductService {
         Product productFromDB = productRepository.findById(productId).orElseThrow(() ->
                 new ResourceNotFoundException("Product", "productId", productId));
 
-//        Product product = modelMapper.map(productDTO, Product.class);
-//        productFromDB.setPrice(product.getPrice());
-//        productFromDB.setProductName(product.getProductName());
-//        productFromDB.setDescription(product.getDescription());
-//        productFromDB.setQuantity(product.getQuantity());
-//        productFromDB.setDiscount(product.getDiscount());
-//        productFromDB.setSpecialPrice(product.getPrice() - (product.getDiscount()/100) * product.getPrice());
-//        productFromDB.setImage(product.getImage());
-//        productFromDB.setCategory(product.getCategory());
         Product product = modelMapper.map(productDTO, Product.class);
         productFromDB.setPrice(product.getPrice());
         productFromDB.setProductName(product.getProductName());
@@ -197,9 +188,7 @@ public class ProductServiceImpl implements ProductService {
         productFromDB.setQuantity(product.getQuantity());
         productFromDB.setDiscount(product.getDiscount());
 
-//        productFromDB.setSpecialPrice(
-//                product.getPrice() - (product.getDiscount() / 100.0) * product.getPrice()
-//        );
+
 
         Double specialPrice = product.getSpecialPrice();
         if (specialPrice == null) {
@@ -209,7 +198,6 @@ public class ProductServiceImpl implements ProductService {
 
 
         productFromDB.setImage(product.getImage());
-// קטגוריה תעודכן רק אם נשלחה ב־DTO
         if (product.getCategory() != null) {
             productFromDB.setCategory(product.getCategory());
 
@@ -320,36 +308,6 @@ public class ProductServiceImpl implements ProductService {
         return productResponse;
     }
 
-//    @Override
-//    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-//        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
-//                ? Sort.by(sortBy).ascending()
-//                : Sort.by(sortBy).descending();
-//
-//        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
-//
-//        User user = authUtil.getLoggedInUser();
-//        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
-//
-//        List<Product> products = pageProducts.getContent();
-//
-//        List<ProductDTO> productDTOS = products.stream()
-//                .map(product -> {
-//                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-//                    productDTO.setImage(constructImageUrl(product.getImage()));
-//                    return productDTO;
-//                })
-//                .toList();
-//
-//        ProductResponse productResponse = new ProductResponse();
-//        productResponse.setContent(productDTOS);
-//        productResponse.setPageNumber(pageProducts.getNumber());
-//        productResponse.setPageSize(pageProducts.getSize());
-//        productResponse.setTotalElements(pageProducts.getTotalElements());
-//        productResponse.setTotalPages(pageProducts.getTotalPages());
-//        productResponse.setLastPage(pageProducts.isLast());
-//        return productResponse;
-//    }
     @Override
     public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         System.out.println("getAllProductsForSeller called with pageNumber: " + pageNumber + ", pageSize: " + pageSize + ", sortBy: " + sortBy + ", sortOrder: " + sortOrder);

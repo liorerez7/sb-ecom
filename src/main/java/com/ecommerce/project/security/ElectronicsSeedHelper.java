@@ -67,7 +67,7 @@ public class ElectronicsSeedHelper {
                 continue;
             }
 
-            int quantity = rnd.nextInt(3, 15);
+            int quantity = rnd.nextInt(50, 250);
             double price = round2(rnd.nextDouble(999.0, 4999.0));
             double discountPercent = round2(rnd.nextDouble(0.0, 20.0));
             double specialPrice = round2(price - (discountPercent / 100.0) * price);

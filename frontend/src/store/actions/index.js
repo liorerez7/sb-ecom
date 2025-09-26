@@ -486,11 +486,6 @@ export const updateProductFromDashboard =
         reset();
         setLoader(false);
         setOpen(false);
-    //     await dispatch(dashboardProductsAction());
-    // } catch (error) {
-    //     toast.error(error?.response?.data?.description || "Product update failed");
-     
-    // }
 
     await dispatch(dashboardProductsAction());
     } catch (error) {
@@ -510,13 +505,7 @@ export const addNewProductFromDashboard =
             toast.success("Product created successfully");
             reset();
             setOpen(false);
-        //     await dispatch(dashboardProductsAction());
-        // } catch (error) {
-        //     console.error(err);
-        //     toast.error(err?.response?.data?.description || "Product creation failed");
-        // } finally {
-        //     setLoader(false);
-        // }
+
 
         await dispatch(dashboardProductsAction());
         } catch (error) {

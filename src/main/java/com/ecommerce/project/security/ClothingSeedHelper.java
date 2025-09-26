@@ -58,7 +58,7 @@ public class ClothingSeedHelper {
             Optional<Product> existing = productRepository.findByCategoryAndProductNameIgnoreCase(clothing, name);
             if (existing.isPresent()) continue;
 
-            int quantity = rnd.nextInt(5, 25);
+            int quantity = rnd.nextInt(50, 250);
             double price = round2(rnd.nextDouble(49.0, 199.0));
             double discountPercent = round2(rnd.nextDouble(0.0, 15.0));
             double specialPrice = round2(price - (discountPercent / 100.0) * price);

@@ -84,7 +84,7 @@ public class BooksSeedHelper {
             String author = AUTHORS[i];
 
             // מספרים ריאליים אך מגוונים
-            int quantity = rnd.nextInt(6, 25);                  // 6–24
+            int quantity = rnd.nextInt(50, 250);                  // 6–24
             double price = round2(rnd.nextDouble(59.0, 249.0)); // ₪59–₪249
             double discountPercent = round2(rnd.nextDouble(0.0, 28.0)); // 0%–28%
             double specialPrice = round2(price - (discountPercent / 100.0) * price);
