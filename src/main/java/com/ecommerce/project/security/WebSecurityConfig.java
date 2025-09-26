@@ -166,7 +166,9 @@ public class WebSecurityConfig {
                                       ProductRepository productRepository,
                                       PasswordEncoder passwordEncoder,
                                       BooksSeedHelper booksSeedHelper,
-                                      ElectronicsSeedHelper electronicsSeedHelper) {
+                                      ElectronicsSeedHelper electronicsSeedHelper,
+                                      ClothingSeedHelper clothingSeedHelper,
+                                      HomeAppliancesSeedHelper homeAppliancesSeedHelper) {
         return args -> {
             // 1) יצירת תפקידים אם חסרים
             Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
@@ -214,9 +216,10 @@ public class WebSecurityConfig {
             }
 
             // 4) זריעת ספרים (10 פריטים) דרך המחלקה החדשה
-            booksSeedHelper.seedBooks();
-
             electronicsSeedHelper.seedElectronics();
+            booksSeedHelper.seedBooks();
+            clothingSeedHelper.seedClothing();
+            homeAppliancesSeedHelper.seedHomeAppliances();
         };
     }
 }
