@@ -45,53 +45,144 @@ export const fetchCategories = () => async (dispatch) => {
 };
 
 
+// export const addToCart = (data, qty = 1, toast) => (dispatch, getState) => {
+
+//     const {products} = getState().products;
+//     const getProduct = products.find((product) => product.productId === data.productId);
+//     const isQuantityExist = getProduct?.quantity >= qty;
+
+//     if(isQuantityExist){
+//         dispatch({type: 'ADD_TO_CART', payload: {...data, quantity: qty}});
+//         localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
+//         toast.success(`${data.productName} added to cart`);
+//     } else{
+//         toast.error(`${data.productName} is out of stock`);
+//     }
+
+
+// };
+
 export const addToCart = (data, qty = 1, toast) => (dispatch, getState) => {
+  // data.quantity שמגיע מהכרטיס = מלאי המוצר בדף המוצרים
+  const stock = Number(data.quantity ?? 0);
 
-    const {products} = getState().products;
-    const getProduct = products.find((product) => product.productId === data.productId);
-    const isQuantityExist = getProduct?.quantity >= qty;
+  dispatch({
+    type: 'ADD_TO_CART',
+    payload: {
+      ...data,
+      stock,          // שומרים מלאי קבוע בפריט העגלה
+      quantity: qty,  // זו הכמות בעגלה, לא המלאי
+    },
+  });
 
-    if(isQuantityExist){
-        dispatch({type: 'ADD_TO_CART', payload: {...data, quantity: qty}});
-        localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
-        toast.success(`${data.productName} added to cart`);
-    } else{
-        toast.error(`${data.productName} is out of stock`);
-    }
-
-
+  localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
+  toast?.success?.(`${data.productName} added to cart`);
 };
 
 
+
+// export const increaseCartQuantity =
+//   (data, toast, currentQuantity, setCurrentQuantity) =>
+//   (dispatch, getState) => {
+//     const { products } = getState().products;
+//     const getProduct = products.find((p) => p.productId === data.productId);
+
+//     const nextQty = Number(currentQuantity ?? 0) + 1;
+//     const isQuantityExist = (getProduct?.quantity ?? 0) >= nextQty;
+
+//     if (isQuantityExist) {
+//       setCurrentQuantity(nextQty);
+//       dispatch({
+//         type: 'ADD_TO_CART',
+//         payload: { ...data, quantity: nextQty },
+//       });
+//       localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
+//     } else {
+//       toast?.error?.(`${data.productName} is out of stock`);
+//     }
+// };
 export const increaseCartQuantity =
   (data, toast, currentQuantity, setCurrentQuantity) =>
   (dispatch, getState) => {
+    const { cart } = getState().carts;
+    const itemInCart = Array.isArray(cart)
+      ? cart.find(i => i.productId === data.productId)
+      : null;
+
+    const baseQty = Number(itemInCart?.quantity ?? currentQuantity ?? 0);
+    const nextQty = baseQty + 1;
+
     const { products } = getState().products;
-    const getProduct = products.find((p) => p.productId === data.productId);
+    const getProduct = Array.isArray(products)
+      ? products.find(p => p.productId === data.productId)
+      : null;
 
-    const nextQty = Number(currentQuantity ?? 0) + 1;
-    const isQuantityExist = (getProduct?.quantity ?? 0) >= nextQty;
+    const stock = Number(
+      itemInCart?.stock ??
+      data?.stock ??
+      getProduct?.quantity ??
+      0
+    );
 
-    if (isQuantityExist) {
-      setCurrentQuantity(nextQty);
+    console.log("[increaseCartQuantity DEBUG]", {
+      productId: data.productId,
+      productName: data.productName,
+      baseQty,
+      nextQty,
+      stockFromCart: itemInCart?.stock,
+      stockFromData: data?.stock,
+      stockFromProducts: getProduct?.quantity,
+      finalStock: stock
+    });
+
+    if (nextQty <= stock) {
+      setCurrentQuantity?.(nextQty);
       dispatch({
         type: 'ADD_TO_CART',
-        payload: { ...data, quantity: nextQty },
+        payload: { ...(itemInCart || data), quantity: nextQty, stock },
       });
       localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
     } else {
-      toast?.error?.(`${data.productName} is out of stock`);
+      toast?.error?.(`${itemInCart?.productName ?? data.productName} is out of stock`);
     }
   };
 
 
-  export const decreaseCartQuantity = 
-    (data, newQuantity) => (dispatch, getState) => {
-        dispatch({
-            type: "ADD_TO_CART",
-            payload: {...data, quantity: newQuantity},
-        });
-        localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart))}
+
+
+// export const decreaseCartQuantity = 
+// (data, newQuantity) => (dispatch, getState) => {
+//     dispatch({
+//         type: "ADD_TO_CART",
+//         payload: {...data, quantity: newQuantity},
+//     });
+//     localStorage.setItem("cartItems", JSON.stringify(getState().carts.cart))
+// };
+export const decreaseCartQuantity =
+  (data, newQuantity) => (dispatch, getState) => {
+    const { cart } = getState().carts;
+    const itemInCart = Array.isArray(cart)
+      ? cart.find(i => i.productId === data.productId)
+      : null;
+
+    const stock = Number(itemInCart?.stock ?? data?.stock ?? 0);
+
+    console.log("[decreaseCartQuantity DEBUG]", {
+      productId: data.productId,
+      productName: data.productName,
+      newQuantity,
+      stockFromCart: itemInCart?.stock,
+      stockFromData: data?.stock,
+      finalStock: stock
+    });
+
+    dispatch({
+      type: 'ADD_TO_CART',
+      payload: { ...(itemInCart || data), quantity: newQuantity, stock },
+    });
+    localStorage.setItem('cartItems', JSON.stringify(getState().carts.cart));
+  };
+
 
 
 export const removeFromCart = (data, toast) => (dispatch, getState) => {

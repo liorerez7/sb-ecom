@@ -198,6 +198,28 @@ public class WebSecurityConfig {
                 userRepository.save(admin);
             }
 
+            // --- משתמשים נוספים user10 ... user20 ---
+            for (int i = 10; i <= 20; i++) {
+                String username = "user" + i;
+                String email = username + "@example.com";
+                String password = "password" + i;
+                if (!userRepository.existsByUsername(username)) {
+                    User u = new User(username, email, passwordEncoder.encode(password));
+                    userRepository.save(u);
+                }
+            }
+
+            // --- מוכרים נוספים seller10 ... seller20 ---
+            for (int i = 10; i <= 20; i++) {
+                String username = "seller" + i;
+                String email = username + "@example.com";
+                String password = "sellerPassword" + i;
+                if (!userRepository.existsByUsername(username)) {
+                    User u = new User(username, email, passwordEncoder.encode(password));
+                    userRepository.save(u);
+                }
+            }
+
             // 3) שיוך תפקידים
             if (userRepository.existsByUsername("user1")) {
                 User user = userRepository.findByUsername("user1").orElseThrow();
@@ -215,7 +237,27 @@ public class WebSecurityConfig {
                 userRepository.save(user);
             }
 
-            // 4) זריעת ספרים (10 פריטים) דרך המחלקה החדשה
+            // שיוך תפקידים ל-user10...user20
+            for (int i = 10; i <= 20; i++) {
+                String username = "user" + i;
+                if (userRepository.existsByUsername(username)) {
+                    User u = userRepository.findByUsername(username).orElseThrow();
+                    u.setRoles(userRoles);
+                    userRepository.save(u);
+                }
+            }
+
+            // שיוך תפקידים ל-seller10...seller20
+            for (int i = 10; i <= 20; i++) {
+                String username = "seller" + i;
+                if (userRepository.existsByUsername(username)) {
+                    User u = userRepository.findByUsername(username).orElseThrow();
+                    u.setRoles(sellerRoles);
+                    userRepository.save(u);
+                }
+            }
+
+            // 4) זריעת ספרים (10 פריטים) דרך המחלקות החדשות
             electronicsSeedHelper.seedElectronics();
             booksSeedHelper.seedBooks();
             clothingSeedHelper.seedClothing();

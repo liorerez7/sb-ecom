@@ -7,31 +7,50 @@ const initialState = {
 export const cartReducer = (state = initialState, action) => {
     
     switch(action.type) {
-        case 'ADD_TO_CART':
-            const productToAdd = action.payload;
-            const existingProduct = state.cart.find((item) => item.productId === productToAdd.productId);
+        // case 'ADD_TO_CART':
+        //     const productToAdd = action.payload;
+        //     const existingProduct = state.cart.find((item) => item.productId === productToAdd.productId);
 
-            if(existingProduct) {
-                const updatedCart = state.cart.map((item) => {
-                    if(item.productId === productToAdd.productId) {
-                        return productToAdd
-                    }
-                    return item;
-                });
+        //     if(existingProduct) {
+        //         const updatedCart = state.cart.map((item) => {
+        //             if(item.productId === productToAdd.productId) {
+        //                 return productToAdd
+        //             }
+        //             return item;
+        //         });
                      
 
-                return {
-                    ...state,
-                    cart: updatedCart,
-                }
+        //         return {
+        //             ...state,
+        //             cart: updatedCart,
+        //         }
+        //     }
+        //     else{
+        //         const newCart = [...state.cart, productToAdd];
+        //         return {
+        //             ...state,
+        //             cart: newCart,
+        //         }
+        //     }
+
+        case 'ADD_TO_CART': 
+            const incoming = action.payload; // כולל productId, quantity (בעגלה), stock (מלאי)
+            const exists = state.cart.find(x => x.productId === incoming.productId);
+
+            let newCart;
+            if (exists) {
+                newCart = state.cart.map(x =>
+                x.productId === incoming.productId
+                    ? { ...x, ...incoming, stock: (incoming.stock ?? x.stock) }
+                    : x
+                );
+            } else {
+                newCart = [...state.cart, incoming];
             }
-            else{
-                const newCart = [...state.cart, productToAdd];
-                return {
-                    ...state,
-                    cart: newCart,
-                }
-            }
+
+            return { ...state, cart: newCart };
+        
+
         case 'REMOVE_FROM_CART':
             const productToRemove = action.payload;
             const updatedCart = state.cart.filter((item) => item.productId !== productToRemove.productId);

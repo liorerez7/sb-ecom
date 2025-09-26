@@ -13,8 +13,25 @@ import { sellerReducer } from "./sellerReducer";
 const user = localStorage.getItem('auth')
    ? JSON.parse(localStorage.getItem('auth')) : null;
 
-const cartItems = localStorage.getItem('cartItems')
-   ? JSON.parse(localStorage.getItem('cartItems')) : [];
+//const cartItems = localStorage.getItem('cartItems')
+  // ? JSON.parse(localStorage.getItem('cartItems')) : [];
+
+const rawCart = localStorage.getItem('cartItems');
+let cartItems = [];
+try {
+  cartItems = rawCart ? JSON.parse(rawCart) : [];
+} catch {
+  cartItems = [];
+}
+
+cartItems = Array.isArray(cartItems)
+  ? cartItems.map(item => ({
+      ...item,
+      stock: typeof item.stock === 'number'
+        ? item.stock
+        : Number(item.stock ?? item.quantity ?? 0),
+    }))
+  : [];
 
 const selectedUserCheckoutAddress = localStorage.getItem('CHECKOUT_ADDRESS')
    ? JSON.parse(localStorage.getItem('CHECKOUT_ADDRESS')) : null;
