@@ -32,7 +32,8 @@ Authentication is handled securely using **JWT** stored in an **HttpOnly cookie*
 
 *(Placeholder for screenshots or a GIF demonstrating the application)*
 
-![Project Screenshot](https://via.placeholder.com/800x450.png?text=Application+Screenshot+Here)
+![Project Screenshot]<img width="1898" height="889" alt="צילום מסך 2025-09-28 194055" src="https://github.com/user-attachments/assets/62b66955-d2fc-4213-80dc-b53642f729e9" />
+
 
 ---
 
