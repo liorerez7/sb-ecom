@@ -85,6 +85,9 @@ The architecture consists of three core services working in tandem:
 ## 🚀 Getting Started
 
 **The application is deployed on an EC2 server. Please contact me, and I will start the website and provide you with the public IP address.**
+DEMO:
+
+https://youtu.be/tViGuz6YK54
 
 ---
 
