@@ -84,37 +84,7 @@ The architecture consists of three core services working in tandem:
 
 ## 🚀 Getting Started
 
-To get a local copy up and running, follow these simple steps.
-
-### Prerequisites
-
--   Git
--   Docker and Docker Compose
-
-### Installation & Launch
-
-1.  **Clone the repository:**
-    ```sh
-    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-    cd your-repo-name
-    ```
-
-2.  **Create an environment file:**
-    Create a `.env` file in the root directory by copying the example file. This is where you'll store your secret keys and database credentials.
-    ```sh
-    cp .env.example .env
-    ```
-    *Now, open the `.env` file and fill in your Stripe API keys, database password, and JWT secret.*
-
-3.  **Build and run the application with Docker Compose:**
-    This command will build the images for the frontend and backend, pull the MySQL image, and start all three containers in detached mode.
-    ```sh
-    docker-compose up -d --build
-    ```
-
-4.  **Access the application:**
-    -   The frontend will be available at `http://localhost:80`.
-    -   The backend API can be accessed via `http://localhost:80/api/`.
+**The application is deployed on an EC2 server. Please contact me, and I will start the website and provide you with the public IP address.**
 
 ---
 
@@ -122,12 +92,10 @@ To get a local copy up and running, follow these simple steps.
 
 The REST API is fully documented using OpenAPI 3. You can explore the interactive documentation via Swagger UI. Once the application is running, navigate to:
 
-`http://localhost:80/swagger-ui/index.html`
+`http://<server ip>/swagger-ui`
 
 ---
 
 ## 👤 Contact
 
-Your Name – [your.email@example.com](mailto:your.email@example.com)
-
-Project Link: [https://github.com/your-username/your-repo-name](https://github.com/your-username/your-repo-name)
+Lior Erez – [liorwork66@gmail.com](mailto:your.email@example.com)
