@@ -101,4 +101,4 @@ The REST API is fully documented using OpenAPI 3. You can explore the interactiv
 
 ## 👤 Contact
 
-Lior Erez – [liorwork66@gmail.com](mailto:your.email@example.com)
+Lior Erez – [liorwork66@gmail.com](mailto:liorwork66@gmail.com)
