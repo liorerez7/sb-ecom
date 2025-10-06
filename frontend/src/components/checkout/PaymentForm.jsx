@@ -117,11 +117,6 @@
 
 
 
-
-
-
-
-
 import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Skeleton } from '../shared/Skeleton';
@@ -143,11 +138,39 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
 
     const copyToClipboard = async (text, field) => {
         try {
+            // Modern clipboard API
             await navigator.clipboard.writeText(text);
             setCopiedField(field);
             setTimeout(() => setCopiedField(null), 2000);
         } catch (err) {
-            console.error('Failed to copy:', err);
+            console.error('Clipboard API failed, trying fallback:', err);
+            // Fallback method for older browsers or non-HTTPS contexts
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.top = '0';
+                textArea.style.left = '0';
+                textArea.style.opacity = '0';
+                textArea.style.pointerEvents = 'none';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                if (successful) {
+                    setCopiedField(field);
+                    setTimeout(() => setCopiedField(null), 2000);
+                } else {
+                    console.error('Fallback copy failed');
+                    alert('Failed to copy. Please copy manually: ' + text);
+                }
+            } catch (err2) {
+                console.error('All copy methods failed:', err2);
+                alert('Failed to copy. Please copy manually: ' + text);
+            }
         }
     };
 
@@ -170,7 +193,6 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                 return;
             }
 
-
             const { error } = await stripe.confirmPayment({
                 elements,
                 clientSecret,
@@ -185,7 +207,6 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                 setProcessing(false);
                 return;
             }
-
 
         } catch (err) {
             console.error("Unexpected error during payment:", err);
@@ -262,7 +283,12 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                                 </div>
                             </div>
                             <button
-                                onClick={() => setShowDemoCard(false)}
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowDemoCard(false);
+                                }}
                                 className="text-white/80 hover:text-white transition p-1"
                                 aria-label="Close demo card"
                             >
@@ -279,7 +305,12 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-white/70 text-xs font-medium">Card Number</span>
                                     <button
-                                        onClick={() => copyToClipboard(demoCardData.number.replace(/\s/g, ''), 'number')}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            copyToClipboard(demoCardData.number.replace(/\s/g, ''), 'number');
+                                        }}
                                         className="cursor-pointer text-white/90 hover:text-white hover:bg-white/30 text-xs font-semibold bg-white/20 px-2 py-1 rounded transition flex items-center gap-1"
                                     >
                                         {copiedField === 'number' ? (
@@ -310,7 +341,12 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-white/70 text-xs font-medium">Expiry</span>
                                         <button
-                                            onClick={() => copyToClipboard(demoCardData.expiry, 'expiry')}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                copyToClipboard(demoCardData.expiry, 'expiry');
+                                            }}
                                             className="cursor-pointer text-white/90 hover:text-white hover:bg-white/30 text-xs font-semibold bg-white/20 px-2 py-1 rounded transition"
                                         >
                                             {copiedField === 'expiry' ? '✓' : 'Copy'}
@@ -325,7 +361,12 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-white/70 text-xs font-medium">CVC</span>
                                         <button
-                                            onClick={() => copyToClipboard(demoCardData.cvc, 'cvc')}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                copyToClipboard(demoCardData.cvc, 'cvc');
+                                            }}
                                             className="cursor-pointer text-white/90 hover:text-white hover:bg-white/30 text-xs font-semibold bg-white/20 px-2 py-1 rounded transition"
                                         >
                                             {copiedField === 'cvc' ? '✓' : 'Copy'}
@@ -351,7 +392,12 @@ const PaymentForm = ({ clientSecret, totalPrice }) => {
             {/* Reopen Button (when closed) */}
             {!showDemoCard && !isLoading && (
                 <button
-                    onClick={() => setShowDemoCard(true)}
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowDemoCard(true);
+                    }}
                     className="fixed bottom-32 sm:bottom-24 md:bottom-20 right-6 z-50 bg-gradient-to-br from-blue-600 to-purple-600 text-white px-4 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 font-semibold border-2 border-white/20 animate-bounce-subtle"
                 >
                     <span className="text-xl">💳</span>
