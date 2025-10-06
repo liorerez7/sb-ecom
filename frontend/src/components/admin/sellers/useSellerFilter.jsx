@@ -16,7 +16,7 @@ const useSellerFilter = () => {
       ? Number(searchParams.get("page"))
       : 1;
 
-    console.log("pageNumber is", currentPage - 1);
+
     params.set("pageNumber", currentPage - 1); // Pagination starts from 0 for API
 
     // Convert params to a query string

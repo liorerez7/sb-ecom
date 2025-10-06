@@ -38,10 +38,12 @@ const AddProductForm = ({ setOpen, product, update = false }) => {
   useEffect(() => {
     const price = parseFloat(priceValue) || 0;
     const discount = parseFloat(discountValue) || 0;
-    const special = parseFloat(price - (discount / 100) * price);
-    if (!isNaN(special)) {
-      setValue("specialPrice", special.toFixed(2));
-    }
+      const special = price - (discount / 100) * price;
+      if (!isNaN(special) && special >= 0) {
+          setValue("specialPrice", special.toFixed(2));
+      } else {
+          setValue("specialPrice", 0);
+      }
   }, [priceValue, discountValue, setValue]);
 
   const saveProductHandler = (data) => {
@@ -97,186 +99,211 @@ const AddProductForm = ({ setOpen, product, update = false }) => {
   if (categoryLoader) return <Skeleton />
   if (errorMessage) return <ErrorPage message={errorMessage} />
 
-  return (
-    <div className='relative h-full'>
-      {loader && <LinearProgress className="absolute top-0 left-0 right-0" />}
-      
-      <form className='space-y-5 py-4' onSubmit={handleSubmit(saveProductHandler)}>
-        {/* Product Info Section */}
-        <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
-            <FaBox className="text-blue-600" />
-            Product Information
-          </h3>
-          
-          <div className='flex md:flex-row flex-col gap-4 w-full'>
-            <div className="flex-1">
-              <InputField 
-                label="Product Name"
-                required
-                id="productName"
-                type="text"
-                message="Product name is required"
-                register={register}
-                placeholder="Enter product name"
-                errors={errors}
-                className="bg-white"
-              />
-            </div>
+    return (
+        <div className="relative h-full">
+            {loader && <LinearProgress className="absolute top-0 left-0 right-0" />}
 
-            {!update && (
-              <div className="flex-1">
-                <SelectTextField
-                  label="Category"
-                  select={selectedCategory}
-                  setSelect={setSelectedCategory}
-                  lists={categories}
-                />
-              </div>
-            )}
-          </div>
-        </div>
+            <form className="space-y-5 py-4" onSubmit={handleSubmit(saveProductHandler)}>
+                {/* Product Info Section */}
+                <div className="bg-blue-50/50 rounded-lg p-4 border border-blue-100">
+                    <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <FaBox className="text-blue-600" />
+                        Product Information
+                    </h3>
 
-        {/* Pricing Section */}
-        <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
-          <h3 className="text-sm font-semibold text-green-900 mb-3 flex items-center gap-2">
-            <FaDollarSign className="text-green-600" />
-            Pricing & Inventory
-          </h3>
-          
-          <div className='flex md:flex-row flex-col gap-4 w-full mb-4'>
-            <div className="flex-1">
-              <InputField 
-                label="Price ($)"
-                required
-                id="price"
-                type="number"
-                step="0.01"
-                message="Price is required"
-                placeholder="0.00"
-                register={register}
-                errors={errors}
-                className="bg-white"
-              />
-            </div>
+                    <div className="flex md:flex-row flex-col gap-4 w-full">
+                        <div className="flex-1">
+                            <InputField
+                                label="Product Name"
+                                required
+                                id="productName"
+                                type="text"
+                                message="Product name is required"
+                                register={register}
+                                rules={{  // ← הוסף את כל ה-rules
+                                    required: "Product name is required",
+                                    minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                    maxLength: { value: 30, message: "Name cannot exceed 30 characters" }
+                                }}
+                                placeholder="Enter product name"
+                                errors={errors}
+                                className="bg-white"
+                            />
+                        </div>
 
-            <div className="flex-1">
-              <InputField 
-                label="Stock Quantity"
-                required
-                id="quantity"
-                type="number"
-                message="Quantity is required"
-                register={register}
-                placeholder="0"
-                errors={errors}
-                className="bg-white"
-              />
-            </div>
-          </div>
+                        {!update && (
+                            <div className="flex-1">
+                                <SelectTextField
+                                    label="Category"
+                                    select={selectedCategory}
+                                    setSelect={setSelectedCategory}
+                                    lists={categories}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-          <div className="flex md:flex-row flex-col gap-4 w-full">
-            <div className="flex-1">
-              <InputField
-                label="Discount (%)"
-                id="discount"
-                type="number"
-                step="0.01"
-                placeholder="0"
-                register={register}
-                errors={errors}
-                className="bg-white"
-              />
-            </div>
-            
-            <div className="flex-1">
-              <InputField
-                label="Special Price ($)"
-                id="specialPrice"
-                type="number"
-                step="0.01"
-                placeholder="Calculated automatically"
-                register={register}
-                errors={errors}
-                readOnly
-                className="bg-gray-50 cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                <FaInfoCircle className="text-gray-400" />
-                Auto-calculated based on discount
-              </p>
-            </div>
-          </div>
-        </div>
+                {/* Pricing Section */}
+                <div className="bg-green-50/50 rounded-lg p-4 border border-green-100">
+                    <h3 className="text-sm font-semibold text-green-900 mb-3 flex items-center gap-2">
+                        <FaDollarSign className="text-green-600" />
+                        Pricing & Inventory
+                    </h3>
 
-        {/* Description Section */}
-        <div className="bg-purple-50/50 rounded-lg p-4 border border-purple-100">
-          <h3 className="text-sm font-semibold text-purple-900 mb-3 flex items-center gap-2">
-            <MdDescription className="text-purple-600" />
-            Product Description
-          </h3>
-          
-          <div className="flex flex-col gap-2 w-full">
+                    {/* Row 1: Price + Quantity */}
+                    <div className="flex md:flex-row flex-col gap-4 w-full mb-4">
+                        <div className="flex-1">
+                            <InputField
+                                label="Price ($)"
+                                required
+                                id="price"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                message="Price is required"
+                                placeholder="0.00"
+                                register={register}
+                                rules={{
+                                    required: "Price is required",
+                                    valueAsNumber: true,
+                                    min: { value: 0, message: "Price must be positive" },
+                                }}
+                                errors={errors}
+                                className="bg-white"
+                            />
+                        </div>
+
+                        <div className="flex-1">
+                            <InputField
+                                label="Stock Quantity"
+                                required
+                                id="quantity"
+                                type="number"
+                                min="0"
+                                message="Quantity is required"
+                                register={register}
+                                rules={{  // ← הוסף את כל ה-rules
+                                    required: "Quantity is required",
+                                    valueAsNumber: true,
+                                    min: { value: 0, message: "Quantity cannot be negative" },
+                                    validate: (value) => Number.isInteger(value) || "Quantity must be a whole number"
+                                }}
+                                placeholder="0"
+                                errors={errors}
+                                className="bg-white"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Row 2: Discount + Special Price */}
+                    <div className="flex md:flex-row flex-col gap-4 w-full">
+                        <div className="flex-1">
+                            <InputField
+                                label="Discount (%)"
+                                id="discount"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                placeholder="0"
+                                register={register}
+                                rules={{
+                                    valueAsNumber: true,
+                                    min: { value: 0, message: "Discount cannot be negative" },  // ← שנה שורה זו
+                                    max: { value: 100, message: "Discount cannot exceed 100%" },  // ← הוסף שורה זו
+                                }}
+                                errors={errors}
+                                className="bg-white"
+                            />
+                        </div>
+
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Special Price ($)
+                            </label>
+
+                            <div className="px-4 py-3 w-full border rounded-lg bg-gray-100 text-gray-800 font-medium cursor-not-allowed select-none">
+                                ${watch("specialPrice") || "0.00"}
+                            </div>
+
+                            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                <FaInfoCircle className="text-gray-400" />
+                                Auto-calculated based on discount
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Description Section */}
+                <div className="bg-purple-50/50 rounded-lg p-4 border border-purple-100">
+                    <h3 className="text-sm font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                        <MdDescription className="text-purple-600" />
+                        Product Description
+                    </h3>
+
+                    <div className="flex flex-col gap-2 w-full">
             <textarea
-              rows={4}
-              placeholder="Enter detailed product description..."
-              className={`px-4 py-3 w-full border rounded-lg bg-white text-gray-800 transition-colors duration-200 resize-none focus:outline-none focus:ring-2 ${
-                errors["description"]?.message 
-                  ? "border-red-400 focus:ring-red-200" 
-                  : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
-              }`}
-              maxLength={255}
-              {...register("description", {
-                required: { value: true, message: "Description is required" },
-              })}
+                rows={4}
+                placeholder="Enter detailed product description..."
+                className={`px-4 py-3 w-full border rounded-lg bg-white text-gray-800 transition-colors duration-200 resize-none focus:outline-none focus:ring-2 ${
+                    errors["description"]?.message
+                        ? "border-red-400 focus:ring-red-200"
+                        : "border-gray-300 focus:ring-blue-200 focus:border-blue-400"
+                }`}
+                maxLength={255}
+                {...register("description", {
+                    required: { value: true, message: "Description is required" },
+                })}
             />
-            
-            <div className="flex justify-between items-center">
-              {errors["description"]?.message && (
-                <p className="text-xs font-medium text-red-600">
-                  {errors["description"]?.message}
-                </p>
-              )}
-              <span className="text-xs text-gray-500 ml-auto">
+
+                        <div className="flex justify-between items-center">
+                            {errors["description"]?.message && (
+                                <p className="text-xs font-medium text-red-600">
+                                    {errors["description"]?.message}
+                                </p>
+                            )}
+                            <span className="text-xs text-gray-500 ml-auto">
                 Max 255 characters
               </span>
-            </div>
-          </div>
-        </div>
+                        </div>
+                    </div>
+                </div>
 
-        {/* Action Buttons */}
-        <Divider className="my-4" />
-        
-        <div className='flex justify-between items-center gap-3'>
-          <Button 
-            disabled={loader}
-            onClick={() => setOpen(false)}
-            variant='outlined'
-            color="inherit"
-            className='px-6 py-2.5 text-gray-700 hover:bg-gray-50 font-medium'
-          >
-            Cancel
-          </Button>
+                {/* Action Buttons */}
+                <Divider className="my-4" />
 
-          <Button
-            disabled={loader}
-            type='submit'
-            variant='contained'
-            className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200'
-          >
-            {loader ? (
-              <div className='flex gap-2 items-center'>
-                <Spinners /> 
-                <span>{update ? 'Updating...' : 'Creating...'}</span>
-              </div>
-            ) : (
-              <span>{update ? 'Update Product' : 'Create Product'}</span>
-            )}
-          </Button>
+                <div className="flex justify-between items-center gap-3">
+                    <Button
+                        disabled={loader}
+                        onClick={() => setOpen(false)}
+                        variant="outlined"
+                        color="inherit"
+                        className="px-6 py-2.5 text-gray-700 hover:bg-gray-50 font-medium"
+                    >
+                        Cancel
+                    </Button>
+
+                    <Button
+                        disabled={loader}
+                        type="submit"
+                        variant="contained"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200"
+                    >
+                        {loader ? (
+                            <div className="flex gap-2 items-center">
+                                <Spinners />
+                                <span>{update ? "Updating..." : "Creating..."}</span>
+                            </div>
+                        ) : (
+                            <span>{update ? "Update Product" : "Create Product"}</span>
+                        )}
+                    </Button>
+                </div>
+            </form>
         </div>
-      </form>
-    </div>
-  );
+    );
+
 };
 
 export default AddProductForm;

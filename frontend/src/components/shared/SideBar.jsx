@@ -33,7 +33,7 @@ const SideBar = ({isProfileLayout = false}) => {
                                         ? 'text-white' 
                                         : 'text-slate-500 group-hover:text-slate-700'
                                 }`}>
-                                    {item.icon}
+                                    <item.icon />
                                 </div>
                                 <span className='truncate'>{item.name}</span>
                                 {pathName === item.href && (

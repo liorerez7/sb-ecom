@@ -31,7 +31,6 @@ function StripePayment() {
         }
       };
 
-      console.log("📤 Creating payment intent for:", sendData);
       dispatch(createStripePaymentSecret(sendData));
     }
   }, [clientSecret, totalPrice, user, selectedUserCheckoutAddress, cartItems, dispatch]);

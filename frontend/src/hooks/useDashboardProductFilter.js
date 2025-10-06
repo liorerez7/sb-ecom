@@ -33,7 +33,6 @@ const useDashboardProductFilter = () => {
     }
 
     const queryString = params.toString();
-    console.log("Query String:", queryString);
 
     dispatch(dashboardProductsAction(queryString, isAdmin));
   }, [dispatch, searchParams, isAdmin]);

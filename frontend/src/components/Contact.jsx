@@ -141,7 +141,6 @@ const Contact = () => {
         setIsSubmitting(true);
         
         try {
-            console.log("Submitted:", form);
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
             

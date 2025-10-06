@@ -66,7 +66,6 @@ export const cartReducer = (state = initialState, action) => {
             return {...state, cart: [], totalPrice: 0, cartId: null};
 
         case 'UPDATE_CART_ITEM_IMAGE':
-            console.log('Updating cart item image:', action.payload);
             return {
                 ...state,
                 cart: state.cart.map(item => 

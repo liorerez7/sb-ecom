@@ -124,16 +124,7 @@ export const increaseCartQuantity =
       0
     );
 
-    console.log("[increaseCartQuantity DEBUG]", {
-      productId: data.productId,
-      productName: data.productName,
-      baseQty,
-      nextQty,
-      stockFromCart: itemInCart?.stock,
-      stockFromData: data?.stock,
-      stockFromProducts: getProduct?.quantity,
-      finalStock: stock
-    });
+
 
     if (nextQty <= stock) {
       setCurrentQuantity?.(nextQty);
@@ -167,14 +158,7 @@ export const decreaseCartQuantity =
 
     const stock = Number(itemInCart?.stock ?? data?.stock ?? 0);
 
-    console.log("[decreaseCartQuantity DEBUG]", {
-      productId: data.productId,
-      productName: data.productName,
-      newQuantity,
-      stockFromCart: itemInCart?.stock,
-      stockFromData: data?.stock,
-      finalStock: stock
-    });
+
 
     dispatch({
       type: 'ADD_TO_CART',
@@ -201,7 +185,6 @@ export const authenticateSignInUser = (sendData, toast, reset, navigate, setLoad
         reset();
         navigate('/');
     } catch (error) {
-        console.log(error);
         toast.error(error?.response?.data?.message || "Login failed");
     } finally {
         setLoader(false);
@@ -220,7 +203,6 @@ export const registerNewUser = (sendData, toast, reset, navigate, setLoader) => 
 
         navigate('/login');
     } catch (error) {
-        console.log(error);
         toast.error(error?.response?.data?.message || "Registration failed");
     } finally {
         setLoader(false);
@@ -395,12 +377,10 @@ export const createStripePaymentSecret = (sendData) => async (dispatch, getState
     try {
         dispatch({ type: "IS_FETCHING" });
         
-        console.log("🔍 Sending payment data:", sendData);
-        
+
         const { data } = await api.post("/order/stripe-client-secret", sendData);
         
-        console.log("✅ Payment secret created:", data);
-        
+
         dispatch({ type: "CLIENT_SECRET", payload: data });
         localStorage.setItem("client-secret", JSON.stringify(data));
         dispatch({ type: "IS_SUCCESS" });
@@ -422,16 +402,14 @@ export const createStripePaymentSecret = (sendData) => async (dispatch, getState
 };
 
 export const stripePaymentConfirmation = (sendData, setErrorMessage, setLoading, toast) => async (dispatch, getState) => {
-    console.log("📦 Creating order with data:", sendData);
-    
+
     try {
         dispatch({ type: 'IS_FETCHING' });
         
         // Create order via API - note the endpoint change to match the working example
         const response = await api.post("/order/users/payments/Stripe", sendData);
         
-        console.log("✅ Order created successfully:", response.data);
-        
+
         if (response.data) {
             // Clear storage
             localStorage.removeItem("CHECKOUT_ADDRESS");
@@ -505,8 +483,7 @@ export const getOrdersForDashboard = (queryString, isAdmin) => async (dispatch) 
         });
         dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
-        console.log(error);
-        dispatch({ 
+        dispatch({
             type: "IS_ERROR",
             payload: error?.response?.data?.message || "Failed to fetch orders data",
          });
@@ -524,7 +501,6 @@ export const updateOrderStatusFromDashboard =
         const queryString = window.location.search.slice(1);
         await dispatch(getOrdersForDashboard(queryString, isAdmin));
     } catch (error) {
-        console.log(error);
         toast.error(error?.response?.data?.message || "Internal Server Error");
     } finally {
         setLoader(false)
@@ -537,10 +513,8 @@ export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch
     try {
         dispatch({ type: "IS_FETCHING" });
         const endpoint = isAdmin ? "/admin/products" : "/seller/products";
-        console.log("is Admin:", isAdmin);
         const { data } = await api.get(`${endpoint}?${queryString}`);
         // Debug: log the entire response data
-        console.log("Dashboard Products API response:", data);
 
         dispatch({
             type: "FETCH_PRODUCTS_SUCCESS",
@@ -553,8 +527,7 @@ export const dashboardProductsAction = (queryString, isAdmin) => async (dispatch
         });
         dispatch({ type: "IS_SUCCESS" });
     } catch (error) {
-        console.log("Dashboard Products API error:", error);
-        dispatch({ 
+        dispatch({
             type: "IS_ERROR",
             payload: error?.response?.data?.message || "Failed to fetch dashboard products",
         });
@@ -568,7 +541,6 @@ export const updateProductFromDashboard =
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
 
         //debug the product:
-        console.log("productId" + sendData.productId + " , " + JSON.stringify(sendData));
 
 
 
@@ -614,8 +586,6 @@ export const deleteProduct =
     try {
         setLoader(true)
         const endpoint = isAdmin ? "/admin/products/" : "/seller/products/";
-        console.log(endpoint);
-        console.log(productId);
         await api.delete(`${endpoint}${productId}`);
         toast.success("Product deleted successfully");
         setLoader(false);
@@ -623,7 +593,6 @@ export const deleteProduct =
         //await dispatch(dashboardProductsAction());
         await dispatch(dashboardProductsAction());
     } catch (error) {
-        console.log(error);
         toast.error(
             error?.response?.data?.message || "Some Error Occured"
         )
@@ -674,7 +643,6 @@ export const getAllCategoriesDashboard = (queryString) => async (dispatch) => {
 
     dispatch({ type: "CATEGORY_SUCCESS" });
   } catch (err) {
-    console.log(err);
 
     dispatch({
       type: "IS_ERROR",
@@ -694,7 +662,6 @@ export const createCategoryDashboardAction =
       setOpen(false);
       await dispatch(getAllCategoriesDashboard());
     } catch (err) {
-      console.log(err);
       toast.error(
         err?.response?.data?.categoryName || "Failed to create new category"
       );
@@ -721,7 +688,6 @@ export const updateCategoryDashboardAction =
       setOpen(false);
       await dispatch(getAllCategoriesDashboard());
     } catch (err) {
-      console.log(err);
       toast.error(
         err?.response?.data?.categoryName || "Failed to update category"
       );
@@ -746,7 +712,6 @@ export const deleteCategoryDashboardAction =
       setOpen(false);
       await dispatch(getAllCategoriesDashboard());
     } catch (err) {
-      console.log(err);
       toast.error(err?.response?.data?.message || "Failed to delete category");
       dispatch({
         type: "IS_ERROR",
@@ -776,7 +741,6 @@ try {
 
     dispatch({ type: "IS_SUCCESS" });
 } catch (err) {
-    console.log(err);
     dispatch({
     type: "IS_ERROR",
     payload: err?.response?.data?.message || "Failed to fetch sellers data",
@@ -794,7 +758,6 @@ export const addNewDashboardSeller =
 
         await dispatch(getAllSellersDashboard());
     } catch (err) {
-        console.log(err);
         toast.error(
         err?.response?.data?.message ||
             err?.response?.data?.password ||
