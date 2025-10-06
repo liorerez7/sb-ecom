@@ -60,7 +60,7 @@ const About = () => {
             color: "#059669",
             technologies: [
                 { name: "AWS EC2" },
-                { name: "Docker + Compose" },
+                { name: "Docker" },
                 { name: "Nginx" },
                 { name: "GitHub Actions" },
                 { name: "Playwright" }
